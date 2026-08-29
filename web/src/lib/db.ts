@@ -1,0 +1,77 @@
+import { DatabaseSync } from "node:sqlite";
+import { mkdirSync } from "node:fs";
+import path from "node:path";
+
+/**
+ * SQLite via node:sqlite — built into Node 22+, so there is no native module to
+ * compile. That matters on Windows, where better-sqlite3 needs build tools.
+ *
+ * This file owns the connection and schema only. Every query lives in repo.ts,
+ * which is the single file to replace when the real backend lands.
+ */
+
+const DB_PATH = path.join(process.cwd(), "data", "floe.db");
+
+const g = globalThis as unknown as { __floeDb?: DatabaseSync };
+
+function migrate(db: DatabaseSync) {
+  db.exec("PRAGMA journal_mode = WAL");
+  db.exec("PRAGMA foreign_keys = ON");
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id             TEXT PRIMARY KEY,
+      username       TEXT,
+      username_lower TEXT UNIQUE,
+      display_name   TEXT NOT NULL,
+      pin_hash       TEXT,
+      pin_salt       TEXT,
+      is_guest       INTEGER NOT NULL DEFAULT 1,
+      created_at     INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      token      TEXT PRIMARY KEY,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS actions (
+      id         TEXT PRIMARY KEY,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      at         INTEGER NOT NULL,
+      bin_id     TEXT,
+      item       TEXT NOT NULL,
+      verified   INTEGER NOT NULL,
+      confidence REAL,
+      reason     TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS friendships (
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      friend_id  TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY (user_id, friend_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS scan_instances (
+      id         TEXT PRIMARY KEY,
+      bin_id     TEXT,
+      created_at INTEGER NOT NULL,
+      used_by    TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_actions_user ON actions(user_id, at DESC);
+    CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+  `);
+}
+
+export function db(): DatabaseSync {
+  if (!g.__floeDb) {
+    mkdirSync(path.dirname(DB_PATH), { recursive: true });
+    const conn = new DatabaseSync(DB_PATH);
+    migrate(conn);
+    g.__floeDb = conn;
+  }
+  return g.__floeDb;
+}

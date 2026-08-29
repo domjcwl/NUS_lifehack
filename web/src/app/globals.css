@@ -1,0 +1,251 @@
+@import "tailwindcss";
+
+:root {
+  /* Polar night. Depth comes from luminosity, not from borders. */
+  --night-0: #030a10;
+  --night-1: #071620;
+  --night-2: #0d232f;
+  --night-3: #143140;
+
+  /* Vibrancy: over dark translucent material, muted grey text dies. */
+  --frost: #f3fafd;
+  --frost-dim: #9db4c2;
+  --frost-faint: #7290a3;
+
+  --ice: #b9e4f6;
+  --aurora-1: #3ad9a6;
+  --aurora-2: #2ba7cd;
+  --aurora-3: #7b6ce0;
+
+  /* Warm accents run brighter on dark than they can on light. */
+  --coral: #ff7d55;
+  --gold: #f2bc4c;
+
+  --edge: rgba(185, 228, 246, 0.14);
+  --edge-bright: rgba(185, 228, 246, 0.26);
+
+  /* Built-in CSS easings are too weak to read as intentional. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --tabbar-h: 4.5rem;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+@theme inline {
+  --color-night-0: var(--night-0);
+  --color-night-1: var(--night-1);
+  --color-night-2: var(--night-2);
+  --color-night-3: var(--night-3);
+  --color-frost: var(--frost);
+  --color-frost-dim: var(--frost-dim);
+  --color-frost-faint: var(--frost-faint);
+  --color-ice: var(--ice);
+  --color-aurora-1: var(--aurora-1);
+  --color-aurora-2: var(--aurora-2);
+  --color-aurora-3: var(--aurora-3);
+  --color-coral: var(--coral);
+  --color-gold: var(--gold);
+  --font-display: var(--font-bricolage);
+  --font-mono: var(--font-plex-mono);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--night-0);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--night-0);
+  color: var(--frost);
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  line-height: 1.5;
+  overscroll-behavior-y: none;
+  min-height: 100dvh;
+}
+
+/*
+ * The aurora. Fixed behind everything, heavily blurred, low opacity — it should
+ * register as atmosphere, never as a graphic competing with content.
+ */
+.aurora {
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(70px) saturate(140%);
+  opacity: 0.5;
+  background:
+    radial-gradient(42% 55% at 22% 32%, var(--aurora-1) 0%, transparent 68%),
+    radial-gradient(46% 50% at 62% 18%, var(--aurora-2) 0%, transparent 70%),
+    radial-gradient(38% 46% at 84% 44%, var(--aurora-3) 0%, transparent 70%);
+}
+
+/*
+ * 34s is far slower than the ~5s oscillation that reads as vestibular motion,
+ * and it is disabled outright under reduced-motion below.
+ */
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-4%, 2%, 0) scale(1.08); }
+}
+.aurora-drift { animation: drift 34s var(--ease-in-out) infinite; }
+
+/* Ground glow — the ice is the light source in this scene. */
+.underglow {
+  position: fixed;
+  inset: auto -20% -30% -20%;
+  height: 55vh;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.28;
+  background: radial-gradient(50% 60% at 50% 100%, var(--ice) 0%, transparent 72%);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-weight: 700;
+}
+/* Tracking is size-specific — large text reads too loose without it pulled in. */
+h1 { letter-spacing: -0.032em; line-height: 1.04; }
+h2 { letter-spacing: -0.022em; line-height: 1.14; }
+
+.mono {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tnum { font-variant-numeric: tabular-nums; }
+
+/*
+ * Surfaces lift by getting lighter, not by gaining a border. A bright top edge
+ * reads as light catching a real material.
+ */
+.card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(185, 228, 246, 0.075) 0%, rgba(185, 228, 246, 0.03) 100%);
+  border: 1px solid var(--edge);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Bigger surfaces read as thicker. */
+.card-lg {
+  border-radius: 1.85rem;
+  border-color: var(--edge-bright);
+  backdrop-filter: blur(28px) saturate(150%);
+}
+
+.chrome-dark {
+  background: rgba(3, 10, 16, 0.82);
+  backdrop-filter: blur(28px) saturate(160%);
+  border-top: 1px solid var(--edge);
+}
+
+/*
+ * Every pressable gets instant feedback on pointer-down. Response is the
+ * foundation — waiting for the click to acknowledge a press feels dead.
+ */
+.press {
+  transition: transform 130ms var(--ease-out), background-color 130ms var(--ease-out),
+    opacity 130ms var(--ease-out);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.press:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--ice) 0%, #8ecde6 100%);
+  color: var(--night-0);
+  font-weight: 600;
+}
+
+/* Touch devices fire hover on tap, so gate hover states out of their way. */
+@media (hover: hover) and (pointer: fine) {
+  .hoverable:hover { background-color: rgba(185, 228, 246, 0.09); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-7px) rotate(1deg); }
+}
+.bob { animation: bob 4.5s ease-in-out infinite; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise 0.34s var(--ease-out) both; }
+
+/* Stagger stays short — long delays read as the interface being slow. */
+.stagger > * { animation: rise 0.34s var(--ease-out) both; }
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 50ms; }
+.stagger > *:nth-child(3) { animation-delay: 100ms; }
+.stagger > *:nth-child(4) { animation-delay: 150ms; }
+.stagger > *:nth-child(5) { animation-delay: 200ms; }
+.stagger > *:nth-child(6) { animation-delay: 250ms; }
+
+/*
+ * Reduced motion means gentler, not none — keep the opacity change that tells
+ * the user something arrived, drop the movement that can cause sickness.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .bob, .aurora-drift { animation: none; }
+  .rise, .stagger > * { animation: none; opacity: 1; transform: none; }
+  .press:active { transform: none; opacity: 0.75; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .card, .card-lg { background: var(--night-2); backdrop-filter: none; }
+  .chrome-dark { background: var(--night-0); backdrop-filter: none; }
+  .aurora, .underglow { display: none; }
+}
+
+@media (prefers-contrast: more) {
+  :root { --edge: rgba(185, 228, 246, 0.45); --frost-dim: #cfe0ea; --frost-faint: #a8bfcd; }
+  .card, .card-lg { background: var(--night-2); backdrop-filter: none; }
+  .aurora, .underglow { display: none; }
+}
+
+/* Leaflet, reskinned for night. */
+.leaflet-container { font-family: inherit; background: var(--night-1); }
+.leaflet-tooltip.cluster-label {
+  background: transparent; border: none; box-shadow: none;
+  color: var(--night-0); font-size: 11px; font-weight: 700; padding: 0;
+}
+.leaflet-tooltip.cluster-label::before { display: none; }
+.leaflet-tooltip:not(.cluster-label) {
+  background: var(--night-2); border: 1px solid var(--edge);
+  color: var(--frost); box-shadow: none;
+}
+.leaflet-tooltip:not(.cluster-label)::before { border-top-color: var(--night-2); }
+.leaflet-control-attribution {
+  background: rgba(3, 10, 16, 0.8) !important;
+  color: var(--frost-faint) !important;
+}
+.leaflet-control-attribution a { color: var(--frost-dim) !important; }
+.leaflet-control-zoom a {
+  background: var(--night-2) !important; color: var(--frost) !important;
+  border-color: var(--edge) !important;
+}
+
+/* Cluster markers: glowing ice discs with the count baked in. */
+.bin-cluster {
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, #dff2fb 0%, #8ecde6 100%);
+  border: 1px solid rgba(3, 16, 26, 0.55);
+  color: #03101a;
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+}

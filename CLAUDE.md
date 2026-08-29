@@ -35,6 +35,26 @@ video and submission — not for building.
 6. **The repo must be runnable by a stranger.** A judge must be able to follow the README and
    start the project. Keep setup instructions accurate as the stack changes.
 
+## Target device: phone and tablet, not desktop
+
+**Floe is a mobile web app.** Judges will see it on a phone, and the core interaction is a
+student standing at a bin with one hand free. Design and test at phone width first;
+desktop is a courtesy, not the target.
+
+This is not a preference — it follows from the mechanic. The QR is scanned by a phone
+camera, the photo is taken on a phone, and the whole loop is meant to take ten seconds
+one-handed in a corridor.
+
+Practical rules:
+- Design at ~390px wide (iPhone) and check ~820px (iPad). The layout is capped at
+  `max-w-lg` and centred, which holds on both.
+- **Thumb reach matters.** Primary actions belong low on the screen, not at the top.
+- Touch targets ≥44px. No hover-only affordances — there is no hover on a phone.
+- Text must be readable at arm's length in a bright corridor; avoid low-contrast greys
+  for anything load-bearing.
+- Test in a real mobile viewport, not a narrowed desktop window — `capture="environment"`
+  on the camera input only does anything on a real device.
+
 ## Where things live
 
 - `docs/lifehack-brief.md` — all event facts, rules, submission requirements. **Single source of
