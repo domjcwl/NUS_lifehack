@@ -38,8 +38,8 @@ export default function Chat() {
   return (
     <div className="flex flex-col gap-4 rise pb-28">
       <header>
-        <h1 className="text-[2.2rem] leading-none">Which bin?</h1>
-        <p className="mt-3 text-[1.05rem] leading-relaxed text-[var(--frost-dim)]">
+        <h1 className="text-title">Which bin?</h1>
+        <p className="mt-3 text-body leading-relaxed text-[var(--frost-dim)]">
           Hesitation is where recyclables end up in general waste. Ask and go.
         </p>
       </header>
@@ -51,7 +51,7 @@ export default function Chat() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="press hoverable flex min-h-14 w-full items-center rounded-[1.7rem] border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-left text-[0.95rem] text-[var(--frost)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+                className="press hoverable flex min-h-14 w-full items-center rounded-[1.7rem] border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-left text-body text-[var(--frost)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
               >
                 {s}
               </button>
@@ -62,14 +62,14 @@ export default function Chat() {
         {msgs.map((m, i) => (
           <div
             key={i}
-            className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+            className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-meta ${
               m.role === "user" ? "ml-auto btn-primary" : "card"
             }`}
           >
             {m.content}
           </div>
         ))}
-        {busy && <p className="mono text-[10px] text-[var(--aurora-2)]">Thinking…</p>}
+        {busy && <p className="mono text-label text-[var(--aurora-2)]">Thinking…</p>}
       </div>
 
       <form
@@ -84,12 +84,12 @@ export default function Chat() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about an item…"
           /* 16px minimum stops iOS zooming the viewport on focus. */
-          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/70 px-5 text-base text-[var(--frost)] outline-none transition-colors placeholder:text-[var(--frost-dim)] focus:border-[var(--aurora-2)]"
+          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/70 px-4 text-body text-[var(--frost)] outline-none transition-colors placeholder:text-[var(--frost-dim)] focus:border-[var(--aurora-2)]"
         />
         <button
           type="submit"
           disabled={busy}
-          className="press grid min-h-14 w-28 place-items-center rounded-full bg-[var(--ice)] text-[1.05rem] font-medium text-[var(--night-0)] disabled:opacity-40"
+          className="press grid min-h-14 w-28 place-items-center rounded-full bg-[var(--ice)] text-body font-medium text-[var(--night-0)] disabled:opacity-40"
         >
           Ask
         </button>

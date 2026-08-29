@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { binByCode } from "@/lib/bins";
 import { bearHealth, bearMood, streakFrom } from "@/lib/bear";
 import {
   actionsFor,
   addAction,
   awardPoints,
-  createInstance,
   getInstance,
   hashSeen,
   markInstanceUsed,
@@ -37,6 +37,8 @@ export async function GET() {
 /** POST /api/log — record a verified action against a scan instance. */
 export async function POST(req: Request) {
   const body = (await req.json()) as {
+    /** The bin code a printed QR carries. */
+    binCode?: string;
     instanceId?: string;
     item?: string;
     confidence?: number;
@@ -46,6 +48,14 @@ export async function POST(req: Request) {
   };
 
   const user = await currentUser();
+
+  /* A printed sticker names a bin, not a one-time slot, so an unknown code is
+     a bad sticker rather than a spent link. */
+  const bin = body.binCode ? binByCode(body.binCode) : null;
+  if (body.binCode && !bin) {
+    return NextResponse.json({ error: "No bin has that code." }, { status: 404 });
+  }
+
   const inst = body.instanceId ? getInstance(body.instanceId) : null;
   if (body.instanceId && !inst) {
     return NextResponse.json({ error: "That scan link is not valid." }, { status: 404 });
@@ -64,7 +74,7 @@ export async function POST(req: Request) {
   addAction({
     userId: user.id,
     at: Date.now(),
-    binId: inst?.binId ?? null,
+    binId: bin?.code ?? inst?.binId ?? null,
     item: body.item ?? "unknown",
     verified: true,
     confidence: body.confidence ?? 0,
@@ -94,10 +104,4 @@ export async function POST(req: Request) {
     levelProgress: levelProgress(xp),
     stage: stageFor(levelFor(xp)),
   });
-}
-
-/** PUT /api/log — mint a fresh scan instance for a bin (what the QR encodes). */
-export async function PUT(req: Request) {
-  const { binId } = (await req.json()) as { binId?: string };
-  return NextResponse.json(createInstance(binId ?? "tpe-826a"));
 }

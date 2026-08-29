@@ -1,4 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { BINS } from "./bins";
 import { db } from "./db";
 import { POINTS, type PointReason } from "./level";
 
@@ -240,16 +241,27 @@ export function seedHistory(userId: string): void {
   const DAY = 86_400_000;
   const now = Date.now();
   const items = ["plastic bottle", "aluminium can", "paper cup sleeve", "cardboard box"];
+
+  /* A real bin, resolved from the dataset rather than a made-up id. The seeded
+     rows show up in the activity list and are attributed like any other, so a
+     placeholder here reads as a bug the moment anyone taps one. */
+  const demoBin = BINS.find((b) => b.name.includes("826A")) ?? BINS[0];
+
   [1, 2, 3, 5, 6, 8].forEach((daysAgo, i) => {
     addAction({
       userId,
       at: now - daysAgo * DAY + 3_600_000,
-      binId: "tpe-826a",
+      binId: demoBin?.code ?? null,
       item: items[i % items.length],
       verified: true,
       confidence: 0.9,
       reason: "Seeded demo history.",
     });
+    /* Seeded actions have to score, or the app opens on the contradiction of a
+       three-day streak sitting next to zero points and a level-one cub. XP is
+       the sum of the ledger, so history without transactions is history that
+       never happened as far as the bear is concerned. */
+    awardPoints(userId, "verified");
   });
 }
 

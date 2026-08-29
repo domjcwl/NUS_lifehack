@@ -213,3 +213,130 @@ suite went from 24s to 0.06s. Dependencies dropped from 18 to 11.
 **QR sticker generator dropped for good** (Dom, 15:45): not ported to web's scan URLs.
 Nothing in the repo now produces a printable QR. The underlying conflict is still open —
 web's `/scan/{id}` consumes a single-use instance, so a sticker glued to a bin works once.
+## Learn tab cut (Sat 29 Aug, ~17:00)
+
+The news feed is gone — tab, `/news`, and the `/prototypes/learn` surface that existed to
+choose its design. This finishes the reasoning already in the build order above: it was P4
+because "the brief says information is not the problem". A tab that does the one thing the
+brief says does not work was costing a sixth of the nav bar and a judge's attention. Five
+tabs now: Nanuq, Bins, Ask, Group, Impact.
+
+Recoverable from git if it turns out to be wanted.
+
+## One type scale, two insets (Sat 29 Aug, ~17:00)
+
+The app had **28 distinct font sizes** across 125 usages — `0.9`, `0.92`, `0.95`, `0.98` and
+`1rem` all coexisting, differences too small to read as intent but enough that nothing lined
+up. Labels did one job at four sizes (8/9/10/11px), and 8px is not legible on a phone held at
+arm's length in a corridor.
+
+Now eight steps in `@theme`, named for their job (`label`, `micro`, `meta`, `body`, `sub`,
+`head`, `title`, `mega`), so a screen picks a role and the scale picks the number. `body` is
+16px: the floor below which iOS zooms the viewport on input focus.
+
+Indentation was the worse half. The page gutter is 1rem, but card insets ran `px-2` through
+`px-6` — seven values, so the first character of every screen landed somewhere new as you
+moved between tabs. Two steps now: `.pad` (1.25rem) and `.pad-tight` (0.875rem/1rem) for dense
+rows. Pill buttons keep `px-6`, inputs take `px-4`; those are component padding, not indentation.
+
+One deliberate exception, marked in the file: the scan screen's `h1` stays one step down. It is
+a bin address that can run long, and that screen is the one-handed path at the bin — the camera
+button has to stay above the fold.
+
+## A QR per bin, and no cluster bubbles (Sat 29 Aug, ~18:00)
+
+**Every bin has its own QR.** The code is derived from the bin's coordinates and postal code,
+never from its index in `bins.json`. A sticker is printed once and then outlives the data
+behind it: the dataset is rebuilt from NEA's feed, and an index-based code would mean one
+upstream insertion silently repoints every sticker in Singapore at the wrong bin. Verified
+collision-free across all 13,004 — the 102 repeats are the same physical spot listed twice
+by NEA, which is the correct answer for them.
+
+This replaces the one-time scan *instance*. That model assumed a screen could mint a fresh
+slot per scan; a sticker glued to a bin lid cannot. The QR now names the bin, and the replay
+defence is the content hash that already stops the same photo being logged twice. This is
+worth being honest about in the demo: the QR proves someone had the bin's code, not that they
+were standing at it. Rotating codes or a location check would prove presence. We did neither.
+
+Error correction is Q rather than the default M, because the sticker lives outdoors and will
+be rained on and scuffed before anyone points a camera at it. Black on white, never themed —
+a low-contrast QR is one that fails in a dim lift lobby, which is exactly where it is used.
+
+**The cluster bubbles are gone.** Every bin in view is now its own dot, drawn on canvas rather
+than as SVG paths. Two things had to change to make that affordable: the map payload became a
+tuple of `[code, lat, lng, kind]` instead of a full bin object, which took an island-wide pan
+from 196KB to 38KB, and the rest of a bin is now fetched only for the one that gets tapped.
+Above 1,200 in view the response is sampled by an even stride — never the first N, which would
+land in whichever town NEA listed first — and the map says how many of how many it is showing
+rather than quietly displaying a fraction.
+
+## Making the camera path survive a real phone (Sat 29 Aug, ~19:00)
+
+The whole path was verified end to end — validate returns a verdict and a media hash, the log
+awards 10 for a verified action and 5 more for the right stream, the same photo is refused
+twice, and the action is attributed to the scanned bin. Four things needed fixing first.
+
+**Photos are downscaled before upload.** The camera hands over a 12MP JPEG, roughly 4MB, which
+is 5.5MB once base64 in a JSON body. The validator asks the model for `detail: "low"`, which
+downsamples to about 512px at the far end, so every byte above 1024px on the longest edge was
+paid for twice: on the venue wifi during a live demo, and on the API bill. EXIF orientation is
+applied at the same time — without it a portrait photo reaches the model on its side, which is
+a good way to have a real bin scored as unrecognisable.
+
+**The validate call has a 45s timeout.** A spinner that never resolves is worse than a message
+you can act on.
+
+**Seeded demo history now scores.** A new user had six actions and a three-day streak sitting
+next to zero points and a level-one cub. XP is the sum of the ledger, so history without point
+transactions never happened as far as the bear is concerned. Those actions were also attributed
+to `tpe-826a`, an id that stopped matching anything the moment bins got real codes.
+
+**Private IPs get http in QR codes.** The origin check listed 192.168 and 10., and the machine
+hands out 172.31.38.250 — inside 172.16/12, private, and missed, so a phone would have been
+sent to https on a dev server that speaks only http. Any bare IPv4 is now treated as direct;
+a proxy's `x-forwarded-proto` still wins where there is one.
+
+The camera itself uses `<input type="file" accept="image/*" capture="environment">`, which
+opens the rear camera through the OS picker. That needs no HTTPS — unlike `getUserMedia` — so
+it works over plain http on the LAN, which is what makes a phone test possible at all.
+
+## The map reads as one thing at a time (Sat 29 Aug, ~20:00)
+
+With clustering gone the dots had a single fixed style, which meant the same mark was doing two
+different jobs badly. Zoomed out there are over a thousand and nobody is picking one out — they
+are showing where Singapore recycles, and at 6px with a dark rim and full opacity they piled up
+into a rash of bright blobs. Zoomed in there are a few dozen, each a place you might walk to.
+
+Size, stroke and opacity now follow zoom: 2.6px unstroked at 60% out at island level, where they
+overlap into density; 6.5px with a rim and full opacity from estate level in, where each is a
+destination. The rendering moved to an explicit canvas renderer with 8px of hit tolerance, so a
+small dot is still a tappable dot — a tap that lands on nothing reads as the app being broken
+rather than the user having missed.
+
+Tiles dropped to 82% opacity so the app's own ground shows through and the bins are the
+brightest thing on screen. The tiles are reference; the data is the subject.
+
+The location marker became a ring instead of a filled disc — it has to be findable without
+competing with what you came for. Zoom buttons are hidden on touch, where pinch already does
+the job and two floating squares sit on top of the only thing the screen is for. Attribution
+keeps its licence obligation but loses its plate, and the caption split in two: what you are
+looking at now on the left, the credit that is always true on the right.
+
+## Tapping a nearby bin moves the map (Sat 29 Aug, ~20:30)
+
+The rows under "closest to you right now" carried the `press` class, so they scaled on touch
+like every other pressable thing in the app — and did nothing. An affordance that lies is worse
+than no affordance.
+
+Tapping one now flies the map to that bin at zoom 17, opens its card, and scrolls the map back
+into view. That last part is the one that is easy to miss: the list sits below the map, so
+moving the map without scrolling to it is indistinguishable from the tap having failed.
+
+The bin flown to is drawn larger with a white rim. Without it the map has moved and the user is
+looking for which of forty dots they asked for. White rather than a third colour — the two fills
+already mean recycling and e-waste, and a third hue would be a third thing to learn.
+
+Zoom 17, not the maximum: close enough that the bin is unambiguous, far enough that the street
+it stands on is still readable, which is what someone about to walk there needs. `flyTo` becomes
+an instant `setView` under reduced motion, and the scroll follows the same preference. The rows
+are real buttons now, so they work from a keyboard and announce themselves.

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
+
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Bin, BinKind } from "@/lib/bins";
 
 /* Leaflet touches window on import, so it can never render on the server. */
@@ -19,6 +21,18 @@ export default function Bins() {
   const [near, setNear] = useState<NearBin[] | null>(null);
   const [status, setStatus] = useState("Finding you…");
   const [selected, setSelected] = useState<Bin | null>(null);
+  const [focus, setFocus] = useState<{ lat: number; lng: number; nonce: number } | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  /* Tapping a bin in the list moves the map to it and opens its card. The list
+     sits below the map, so the map is scrolled back into view as well — moving
+     something the user cannot see is the same as doing nothing. */
+  const showOnMap = useCallback((b: Bin) => {
+    setSelected(b);
+    setFocus({ lat: b.lat, lng: b.lng, nonce: Date.now() });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    mapRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, []);
 
   const toggleKind = (k: BinKind) =>
     setKinds((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
@@ -49,24 +63,32 @@ export default function Bins() {
   return (
     <div className="stagger space-y-5">
       <header>
-        <h1 className="text-[1.6rem]">Every bin in Singapore</h1>
-        <p className="mt-1.5 text-[0.95rem] text-[var(--frost-dim)]">
+        <h1 className="text-title">Every bin in Singapore</h1>
+        <p className="mt-1.5 text-body text-[var(--frost-dim)]">
           13,004 recycling and e-waste points, straight from NEA — including the blue bin at
           the foot of your block. The most common reason something recyclable goes in general
           waste is simply not knowing where the right bin is.
         </p>
       </header>
 
-      <BinMap onSelect={setSelected} kinds={kinds} onToggleKind={toggleKind} />
+      <div ref={mapRef} className="scroll-mt-4">
+        <BinMap
+          onSelect={setSelected}
+          kinds={kinds}
+          onToggleKind={toggleKind}
+          focus={focus}
+          selectedCode={selected?.code ?? null}
+        />
+      </div>
 
       {selected && (
-        <section className="card px-5 py-4">
+        <section className="card pad">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="mono text-[10px] text-[var(--aurora-2)]">{kindLabel(selected.kind)}</p>
+              <p className="mono text-label text-[var(--aurora-2)]">{kindLabel(selected.kind)}</p>
               <p className="mt-1 font-medium">{selected.name}</p>
               {selected.postal && (
-                <p className="mono mt-1 text-[10px] text-[var(--frost-dim)]">
+                <p className="mono mt-1 text-label text-[var(--frost-dim)]">
                   Singapore {selected.postal}
                 </p>
               )}
@@ -83,17 +105,34 @@ export default function Bins() {
             {selected.streams.map((s) => (
               <span
                 key={s}
-                className="rounded-full bg-[var(--night-3)] px-2.5 py-1 text-[10px] text-[var(--frost-dim)]"
+                className="rounded-full bg-[var(--night-3)] px-3 py-1 text-micro text-[var(--frost-dim)]"
               >
                 {s}
               </span>
             ))}
           </div>
+
+          {/* The same page the sticker on this bin opens — so the flow can be
+              demonstrated, and used, without a printed QR to hand. */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`/scan/${selected.code}`}
+              className="press btn-primary inline-flex min-h-14 items-center rounded-full px-6 text-body font-medium"
+            >
+              Log at this bin
+            </Link>
+            <Link
+              href={`/bins/${selected.code}/qr`}
+              className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-body"
+            >
+              QR sticker
+            </Link>
+          </div>
         </section>
       )}
 
       <section>
-        <p className="mono text-[10px] text-[var(--frost-dim)]">{status}</p>
+        <p className="mono text-label text-[var(--frost-dim)]">{status}</p>
         {near === null ? (
           <div className="mt-3 space-y-2">
             {[0, 1, 2].map((i) => (
@@ -103,21 +142,24 @@ export default function Bins() {
         ) : near.length === 0 ? null : (
           <ul className="mt-3 space-y-2.5">
             {near.map((b) => (
-              <li
-                key={b.id}
-                className="card press flex items-start justify-between gap-4 px-5 py-4"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{b.name}</p>
-                  <p className="mono mt-1 text-[10px] text-[var(--frost-dim)]">
-                    {kindLabel(b.kind)}
-                    {b.postal ? ` · ${b.postal}` : ""}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-lg font-semibold tabular-nums">{format(b.metres)}</p>
-                  <p className="mono text-[9px] text-[var(--frost-dim)]">away</p>
-                </div>
+              <li key={b.id}>
+                <button
+                  onClick={() => showOnMap(b)}
+                  aria-label={`Show ${b.name} on the map`}
+                  className="card press hoverable pad flex w-full items-start justify-between gap-4 text-left"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{b.name}</p>
+                    <p className="mono mt-1 text-label text-[var(--frost-dim)]">
+                      {kindLabel(b.kind)}
+                      {b.postal ? ` · ${b.postal}` : ""}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-sub font-semibold tabular-nums">{format(b.metres)}</p>
+                    <p className="mono text-label text-[var(--frost-dim)]">away</p>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>

@@ -25,7 +25,7 @@ minute's walk of one of the 12,291 blue bins in NEA's dataset.
 
 ## How it works
 
-1. **A code at the bin.** Scanning it mints a one-time slot tied to that specific blue
+1. **A code at the bin.** Every bin in Singapore has its own QR, so scanning names that blue
    bin — the intervention is where and when the decision happens, not in an app you must
    remember to open.
 2. **One photo.** Hold the item at the bin and shoot.
@@ -115,11 +115,12 @@ a photo was checked when it wasn't.
 ### Walking through it
 
 1. Open `/` — Nanuq, the floe, your streak.
-2. Press **Scan the code at Blk 826A**. This stands in for a phone camera reading a QR
-   printed on the bin; it mints a real one-time scan instance. Blk 826A Tampines Street 81
+2. Press **Find a bin near you**, tap any bin on the map, then **Log at this bin** — the
+   same page its printed QR opens. To see the sticker itself, tap **QR sticker**; Blk 826A
+   Tampines Street 81
    is a real blue-bin location from the NEA dataset.
 3. Take or upload a photo. It is validated, then logged, and the streak advances.
-4. Open `/bins` for the island-wide map — 13,004 real NEA points, clustered.
+4. Open `/bins` for the island-wide map — 13,004 real NEA points, drawn individually.
 5. Open `/impact` for the measurement story.
 
 ### Why HDB residents, and not students
@@ -130,6 +131,29 @@ We started from a hostel poster, but the data moved us. NEA's recycling-bin data
 nearby would have been designing against our own evidence. The blue bin at the foot of an
 HDB block is the densest point-of-decision surface in Singapore, so that is where Floe
 lives. E-waste points *do* cover campus, which is a natural second phase.
+
+## The QR on the bin
+
+Every one of the 13,004 bins has its own code and its own QR, generated on demand at
+`/api/qr/<code>` and printable from `/bins/<code>/qr`. Scanning opens `/scan/<code>`, which
+is that bin's page: the photo gets logged against that block rather than against nothing.
+
+**The code is derived from the bin's coordinates and postal code, never from its position in
+the dataset.** A sticker is printed once and then outlives the data behind it — `bins.json`
+gets rebuilt from NEA's feed, and if the code were an array index, a single insertion upstream
+would silently repoint every sticker in Singapore at the wrong bin. Verified collision-free
+across all 13,004: 102 codes repeat, and every one of those is the same physical location
+listed twice by NEA.
+
+Codes avoid `0`/`O` and `1`/`I`/`L`, like the group invite codes, because a peeled sticker
+gets read aloud and typed.
+
+**What this does and does not prove.** It proves the photo was taken by someone who had that
+bin's code. It does not prove they were standing there — a printed QR is static, so it can be
+photographed once and reused from a sofa. The defence that does work is the content hash: the
+same photo cannot be logged twice. A serious deployment would rotate a code on a small display,
+or check the phone's location against the bin's. We did neither, and say so rather than
+claiming the QR is proof of presence.
 
 ## Accounts, groups and growth
 
@@ -223,11 +247,13 @@ it is the wrong amount for anything real.
 web/src/
   app/
     page.tsx              home — bear, streak, scan entry
-    scan/[id]/page.tsx    camera capture + verdict
+    scan/[code]/          the page a bin's QR opens: camera capture + verdict
+    bins/[code]/qr/       printable sticker for one bin
+    api/qr/[code]/        that bin's QR, as SVG
     impact/page.tsx       baseline, metric, target, control arm
     bins/  chat/  news/   friction removers and context
     api/validate/         Claude vision verification
-    api/log/              scan instances, action log, bear state
+    api/log/              action log, points, bear state
   components/Bear.tsx     SVG floe that shrinks with health
   lib/bear.ts             mood, health, streak logic
   lib/store.ts            in-memory store + campus bin data
@@ -261,7 +287,7 @@ dropped database connection. It is a single module to swap.
   reproduce `web/data/bins.json` from source.
 - **Basemap tiles from [OneMap](https://www.onemap.gov.sg/)** © Singapore Land Authority —
   the official national basemap (Night style), no API key required.
-- **Leaflet** / **react-leaflet** for the map, **supercluster** for server-side clustering.
+- **Leaflet** / **react-leaflet** for the map, drawn on canvas. **qrcode** for the bin stickers.
 - Impact-screen cohort figures are **simulated**, as described above.
 - Singapore recycling guidance in the assistant's prompt reflects publicly documented NEA
   blue-bin rules.
