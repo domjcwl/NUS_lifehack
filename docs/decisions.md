@@ -269,3 +269,33 @@ from 196KB to 38KB, and the rest of a bin is now fetched only for the one that g
 Above 1,200 in view the response is sampled by an even stride — never the first N, which would
 land in whichever town NEA listed first — and the map says how many of how many it is showing
 rather than quietly displaying a fraction.
+
+## Making the camera path survive a real phone (Sat 29 Aug, ~19:00)
+
+The whole path was verified end to end — validate returns a verdict and a media hash, the log
+awards 10 for a verified action and 5 more for the right stream, the same photo is refused
+twice, and the action is attributed to the scanned bin. Four things needed fixing first.
+
+**Photos are downscaled before upload.** The camera hands over a 12MP JPEG, roughly 4MB, which
+is 5.5MB once base64 in a JSON body. The validator asks the model for `detail: "low"`, which
+downsamples to about 512px at the far end, so every byte above 1024px on the longest edge was
+paid for twice: on the venue wifi during a live demo, and on the API bill. EXIF orientation is
+applied at the same time — without it a portrait photo reaches the model on its side, which is
+a good way to have a real bin scored as unrecognisable.
+
+**The validate call has a 45s timeout.** A spinner that never resolves is worse than a message
+you can act on.
+
+**Seeded demo history now scores.** A new user had six actions and a three-day streak sitting
+next to zero points and a level-one cub. XP is the sum of the ledger, so history without point
+transactions never happened as far as the bear is concerned. Those actions were also attributed
+to `tpe-826a`, an id that stopped matching anything the moment bins got real codes.
+
+**Private IPs get http in QR codes.** The origin check listed 192.168 and 10., and the machine
+hands out 172.31.38.250 — inside 172.16/12, private, and missed, so a phone would have been
+sent to https on a dev server that speaks only http. Any bare IPv4 is now treated as direct;
+a proxy's `x-forwarded-proto` still wins where there is one.
+
+The camera itself uses `<input type="file" accept="image/*" capture="environment">`, which
+opens the rear camera through the OS picker. That needs no HTTPS — unlike `getUserMedia` — so
+it works over plain http on the LAN, which is what makes a phone test possible at all.

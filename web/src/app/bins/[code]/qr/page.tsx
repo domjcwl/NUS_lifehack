@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { binByCode } from "@/lib/bins";
-import { qrSvg } from "@/lib/qr";
+import { originFrom, qrSvg } from "@/lib/qr";
 
 /**
  * The sticker that goes on the bin.
@@ -18,9 +18,7 @@ export default async function BinQr({ params }: { params: Promise<{ code: string
 
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto =
-    h.get("x-forwarded-proto") ?? (/^(localhost|127\.|192\.168\.|10\.)/.test(host) ? "http" : "https");
-  const url = `${proto}://${host}/scan/${bin.code}`;
+  const url = `${originFrom(host, h.get("x-forwarded-proto"))}/scan/${bin.code}`;
   const svg = await qrSvg(url);
 
   return (

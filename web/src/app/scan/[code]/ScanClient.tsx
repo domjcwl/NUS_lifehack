@@ -33,22 +33,33 @@ export default function ScanClient({ bin }: { bin: Bin }) {
     if (!file) return;
     setError(null);
 
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const fr = new FileReader();
-      fr.onload = () => resolve(fr.result as string);
-      fr.onerror = () => reject(new Error("Could not read that photo."));
-      fr.readAsDataURL(file);
-    });
+    const dataUrl = await downscale(file);
 
     setPreview(dataUrl);
     setPhase("checking");
 
     try {
-      const res = await fetch("/api/validate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ image: dataUrl }),
-      });
+      /* Vision calls take a few seconds on a good connection. On venue wifi
+         they can stall outright, and a spinner that never resolves is worse
+         than a message you can act on. */
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), 45_000);
+      let res: Response;
+      try {
+        res = await fetch("/api/validate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ image: dataUrl }),
+          signal: abort.signal,
+        });
+      } catch (e) {
+        throw abort.signal.aborted
+          ? new Error("That took too long — check the connection and try again.")
+          : e;
+      } finally {
+        clearTimeout(timer);
+      }
+
       const v = (await res.json()) as Verdict & { error?: string };
       if (v.error) throw new Error(v.error);
 
@@ -231,4 +242,56 @@ export default function ScanClient({ bin }: { bin: Bin }) {
       />
     </>
   );
+}
+
+/**
+ * The longest edge a photo is uploaded at.
+ *
+ * A phone camera hands over a 12MP JPEG — around 4MB, which is 5.5MB once it is
+ * base64 in a JSON body. The validator asks the model for `detail: "low"`, which
+ * downsamples to roughly 512px at the far end, so every byte above this is paid
+ * for twice: once on the venue wifi during a live demo, and once on the API bill.
+ */
+const MAX_EDGE = 1024;
+
+/** Last resort: hand the file over untouched. */
+function readRaw(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result as string);
+    fr.onerror = () => reject(new Error("Could not read that photo."));
+    fr.readAsDataURL(file);
+  });
+}
+
+/**
+ * Shrink a camera photo before it goes anywhere.
+ *
+ * `imageOrientation: "from-image"` applies the EXIF rotation that phones write
+ * instead of rotating pixels — without it, a photo taken in portrait arrives at
+ * the model on its side, which is a good way to have a real bin scored as
+ * unrecognisable. Every step falls back to the original file rather than failing
+ * the scan: a large upload is a slow success, a thrown error is a lost one.
+ */
+async function downscale(file: File): Promise<string> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return readRaw(file);
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+
+    /* JPEG at 0.82: past this the file grows faster than anything the model can
+       use, and a bin in a lift lobby is not a subject that rewards fidelity. */
+    return canvas.toDataURL("image/jpeg", 0.82);
+  } catch {
+    return readRaw(file);
+  }
 }
