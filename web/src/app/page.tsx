@@ -36,7 +36,7 @@ export default function Home() {
     return (
       <div className="space-y-4">
         <div className="card card-lg h-80 animate-pulse opacity-50" />
-        <div className="card h-24 animate-pulse opacity-30" />
+        <div className="card h-24 animate-pulse opacity-50" />
       </div>
     );
   }
