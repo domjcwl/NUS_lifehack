@@ -236,7 +236,7 @@ export default function ScanClient({ bin }: { bin: Bin }) {
         ref={fileRef}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture="user"
         onChange={onPick}
         className="hidden"
       />

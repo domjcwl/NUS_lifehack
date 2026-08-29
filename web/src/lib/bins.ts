@@ -65,16 +65,35 @@ function codeFor(postal: string, lat: number, lng: number): string {
   return out;
 }
 
-export const BINS: Bin[] = (raw as RawBin[]).map((r, i) => ({
-  id: i,
-  code: codeFor(r.p, r.y, r.x),
-  name: r.n,
-  postal: r.p,
-  kind: r.t as BinKind,
-  streams: r.s,
-  lat: r.y,
-  lng: r.x,
-}));
+export const BINS: Bin[] = (() => {
+  const seen = new Set<string>();
+  const bins: Bin[] = [];
+
+  for (const [i, r] of (raw as RawBin[]).entries()) {
+    const bin: Bin = {
+      id: i,
+      code: codeFor(r.p, r.y, r.x),
+      name: r.n,
+      postal: r.p,
+      kind: r.t as BinKind,
+      streams: r.s,
+      lat: r.y,
+      lng: r.x,
+    };
+
+    if (seen.has(bin.code)) {
+      /* Same spot, same postal: genuinely the same physical location listed twice
+         upstream. Keep the first and let both resolve to it to avoid duplicate map marks
+         and broken selection states. */
+      continue;
+    }
+
+    seen.add(bin.code);
+    bins.push(bin);
+  }
+
+  return bins;
+})();
 
 /* Built once. A collision would mean two bins sharing a sticker, so it is
    worth knowing about at boot rather than in a corridor. */
@@ -82,8 +101,6 @@ const BY_CODE = new Map<string, Bin>();
 for (const b of BINS) {
   const clash = BY_CODE.get(b.code);
   if (clash) {
-    /* Same spot, same postal: genuinely the same physical location listed
-       twice upstream. Keep the first and let both resolve to it. */
     if (clash.lat !== b.lat || clash.lng !== b.lng) {
       console.warn(`[bins] code collision ${b.code}: "${clash.name}" vs "${b.name}"`);
     }
