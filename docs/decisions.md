@@ -321,3 +321,22 @@ competing with what you came for. Zoom buttons are hidden on touch, where pinch 
 the job and two floating squares sit on top of the only thing the screen is for. Attribution
 keeps its licence obligation but loses its plate, and the caption split in two: what you are
 looking at now on the left, the credit that is always true on the right.
+
+## Tapping a nearby bin moves the map (Sat 29 Aug, ~20:30)
+
+The rows under "closest to you right now" carried the `press` class, so they scaled on touch
+like every other pressable thing in the app — and did nothing. An affordance that lies is worse
+than no affordance.
+
+Tapping one now flies the map to that bin at zoom 17, opens its card, and scrolls the map back
+into view. That last part is the one that is easy to miss: the list sits below the map, so
+moving the map without scrolling to it is indistinguishable from the tap having failed.
+
+The bin flown to is drawn larger with a white rim. Without it the map has moved and the user is
+looking for which of forty dots they asked for. White rather than a third colour — the two fills
+already mean recycling and e-waste, and a third hue would be a third thing to learn.
+
+Zoom 17, not the maximum: close enough that the bin is unambiguous, far enough that the street
+it stands on is still readable, which is what someone about to walk there needs. `flyTo` becomes
+an instant `setView` under reduced motion, and the scroll follows the same preference. The rows
+are real buttons now, so they work from a keyboard and announce themselves.

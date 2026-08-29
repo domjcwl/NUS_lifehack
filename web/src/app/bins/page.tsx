@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Bin, BinKind } from "@/lib/bins";
 
 /* Leaflet touches window on import, so it can never render on the server. */
@@ -21,6 +21,18 @@ export default function Bins() {
   const [near, setNear] = useState<NearBin[] | null>(null);
   const [status, setStatus] = useState("Finding you…");
   const [selected, setSelected] = useState<Bin | null>(null);
+  const [focus, setFocus] = useState<{ lat: number; lng: number; nonce: number } | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  /* Tapping a bin in the list moves the map to it and opens its card. The list
+     sits below the map, so the map is scrolled back into view as well — moving
+     something the user cannot see is the same as doing nothing. */
+  const showOnMap = useCallback((b: Bin) => {
+    setSelected(b);
+    setFocus({ lat: b.lat, lng: b.lng, nonce: Date.now() });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    mapRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, []);
 
   const toggleKind = (k: BinKind) =>
     setKinds((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
@@ -59,7 +71,15 @@ export default function Bins() {
         </p>
       </header>
 
-      <BinMap onSelect={setSelected} kinds={kinds} onToggleKind={toggleKind} />
+      <div ref={mapRef} className="scroll-mt-4">
+        <BinMap
+          onSelect={setSelected}
+          kinds={kinds}
+          onToggleKind={toggleKind}
+          focus={focus}
+          selectedCode={selected?.code ?? null}
+        />
+      </div>
 
       {selected && (
         <section className="card pad">
@@ -122,21 +142,24 @@ export default function Bins() {
         ) : near.length === 0 ? null : (
           <ul className="mt-3 space-y-2.5">
             {near.map((b) => (
-              <li
-                key={b.id}
-                className="card press pad flex items-start justify-between gap-4"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{b.name}</p>
-                  <p className="mono mt-1 text-label text-[var(--frost-dim)]">
-                    {kindLabel(b.kind)}
-                    {b.postal ? ` · ${b.postal}` : ""}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-sub font-semibold tabular-nums">{format(b.metres)}</p>
-                  <p className="mono text-label text-[var(--frost-dim)]">away</p>
-                </div>
+              <li key={b.id}>
+                <button
+                  onClick={() => showOnMap(b)}
+                  aria-label={`Show ${b.name} on the map`}
+                  className="card press hoverable pad flex w-full items-start justify-between gap-4 text-left"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{b.name}</p>
+                    <p className="mono mt-1 text-label text-[var(--frost-dim)]">
+                      {kindLabel(b.kind)}
+                      {b.postal ? ` · ${b.postal}` : ""}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-sub font-semibold tabular-nums">{format(b.metres)}</p>
+                    <p className="mono text-label text-[var(--frost-dim)]">away</p>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>

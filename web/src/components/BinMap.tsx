@@ -50,8 +50,15 @@ export default function BinMap({
   onSelect,
   kinds,
   onToggleKind,
+  focus,
+  selectedCode,
 }: {
   onSelect?: (b: Bin) => void;
+  /* Somewhere to fly to, set when a row in the nearby list is tapped. The nonce
+     is what makes tapping the same row twice fly there again. */
+  focus?: { lat: number; lng: number; nonce: number } | null;
+  /** Drawn larger and ringed, so "the map moved" becomes "here it is". */
+  selectedCode?: string | null;
   /* Owned by the page so the chips drive the nearby list too — they used to
      change the map only, which made the filter quietly lie. */
   kinds: BinKind[];
@@ -132,23 +139,30 @@ export default function BinMap({
           />
           <Loader kinds={kinds} onView={setView} />
           <ZoomWatch onZoom={setZoom} />
+          <FlyTo target={focus ?? null} />
           <Locate onFound={setMe} />
 
-          {view.points.map(([code, lat, lng, kind]) => (
-            <CircleMarker
-              key={code}
-              center={[lat, lng]}
-              radius={dot.radius}
-              eventHandlers={{ click: () => void openBin(code) }}
-              pathOptions={{
-                color: "#03101a",
-                stroke: dot.stroke,
-                weight: dot.weight,
-                fillColor: kind === 1 ? KIND_COLOUR.ewaste : KIND_COLOUR.recycling,
-                fillOpacity: dot.fillOpacity,
-              }}
-            />
-          ))}
+          {view.points.map(([code, lat, lng, kind]) => {
+            const chosen = code === selectedCode;
+            return (
+              <CircleMarker
+                key={code}
+                center={[lat, lng]}
+                radius={chosen ? Math.max(dot.radius, 8) : dot.radius}
+                eventHandlers={{ click: () => void openBin(code) }}
+                pathOptions={{
+                  /* A white rim rather than another colour: the two fills already
+                     mean recycling and e-waste, and a third hue would be a third
+                     thing to learn. */
+                  color: chosen ? "#ffffff" : "#03101a",
+                  stroke: chosen ? true : dot.stroke,
+                  weight: chosen ? 2 : dot.weight,
+                  fillColor: kind === 1 ? KIND_COLOUR.ewaste : KIND_COLOUR.recycling,
+                  fillOpacity: chosen ? 1 : dot.fillOpacity,
+                }}
+              />
+            );
+          })}
 
           {/* You, as a ring rather than a filled disc — it has to be findable
               without competing with the bins, which are what you came for. */}
@@ -217,6 +231,26 @@ function Loader({
     else onView({ points: [], total: 0, capped: false });
   }, [kindKey, load, onView]);
 
+  return null;
+}
+
+/**
+ * Moves the map to a bin picked from the list below it.
+ *
+ * Zoom 17 rather than the map's maximum: close enough that the bin is
+ * unambiguous, far enough that the street it sits on is still legible, which is
+ * what someone about to walk there actually needs.
+ */
+function FlyTo({ target }: { target: { lat: number; lng: number; nonce: number } | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!target) return;
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) map.setView([target.lat, target.lng], 17);
+    else map.flyTo([target.lat, target.lng], 17, { duration: 0.9 });
+  }, [target, map]);
   return null;
 }
 
