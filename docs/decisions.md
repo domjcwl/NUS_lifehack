@@ -453,3 +453,24 @@ longer nearest — a wrong answer with no visible cause. The next location quest
 Top-right, and deliberately far from the send button at the bottom of the screen. A thumb
 reaching to ask a question should never be able to land on "erase everything". It appears
 only once there is something to clear.
+
+## Vercel: what it takes, and what it costs (Sat 29 Aug, ~23:15)
+
+`next build` passes and every route compiles, so the only blocker is the database. Vercel's
+filesystem is read-only outside `/tmp`, so `mkdirSync` in `db.ts` throws on the first request
+that touches SQLite — it crashes rather than merely forgetting, taking out signup, login,
+logout, profile, username check, groups and `/api/log`.
+
+`DB_PATH` now resolves to `/tmp/floe.db` on Vercel, `FLOE_DB_PATH` if set, and the real file
+locally. That makes a deploy survive rather than 500. It is honestly a preview, not a demo
+target: `/tmp` is per-instance, so an account created on one request can be gone on the next.
+
+**What works on Vercel:** the map and all 12,902 bins, QR generation, the photo validator, the
+impact page, and chat — the last one degraded, because `/api/chat` falls back to a direct model
+call when the FastAPI service is unreachable, which it always is from Vercel.
+
+**The permanent fix** is a hosted database behind `repo.ts`, which was built as the single
+swappable data layer. Turso/libSQL is the closest fit. The cost is that every hosted DB is async
+while `node:sqlite` is sync: 30 exported functions and ~70 call sites across 7 files gain
+`await`. Roughly 60–90 minutes, with the risk landing on login and points. Deferred, not
+rejected — the judged demo runs off the tunnel against a real database.

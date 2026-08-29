@@ -10,7 +10,23 @@ import path from "node:path";
  * which is the single file to replace when the real backend lands.
  */
 
-const DB_PATH = path.join(process.cwd(), "data", "floe.db");
+/**
+ * Where the database file lives.
+ *
+ * Locally that is `web/data/floe.db`, which persists and is the real store.
+ *
+ * On Vercel the filesystem is read-only apart from `/tmp`, so writing anywhere
+ * else throws on the first request that touches the database and takes down
+ * signup, login, scanning and the leaderboard with it. `/tmp` keeps the app
+ * alive there, but it is per-instance and disappears with the instance: an
+ * account made on one request may be gone on the next. That is adequate for a
+ * hosted preview and is NOT adequate for the judged demo, which runs against a
+ * real file on a real machine. The permanent fix is a hosted database behind
+ * `repo.ts` — see docs/decisions.md.
+ */
+const DB_PATH =
+  process.env.FLOE_DB_PATH ??
+  (process.env.VERCEL ? "/tmp/floe.db" : path.join(process.cwd(), "data", "floe.db"));
 
 const g = globalThis as unknown as { __floeDb?: DatabaseSync };
 
