@@ -37,3 +37,11 @@ export interface Bin {
   lng: number;
   streams: string[];
 }
+
+/** The shape the client needs for the signed-in (or guest) identity. */
+export interface Me {
+  id: string;
+  username: string | null;
+  displayName: string;
+  isGuest: boolean;
+}

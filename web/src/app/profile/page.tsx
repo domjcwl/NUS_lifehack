@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import AuthSheet, { type Me } from "@/components/AuthSheet";
 import Bear from "@/components/Bear";
+
 import { BEAR_COPY } from "@/lib/bear";
-import type { BearMood } from "@/lib/types";
+import type { BearMood, Me } from "@/lib/types";
 
 interface Stats {
   total: number;
@@ -42,7 +42,6 @@ export default function Profile() {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [sheet, setSheet] = useState<"create" | "signin" | null>(null);
 
   const load = useCallback(() => {
     fetch("/api/auth/profile")
@@ -161,18 +160,18 @@ export default function Profile() {
             username and it follows you to any device.
           </p>
           <div className="mt-4 flex flex-wrap gap-2.5">
-            <button
-              onClick={() => setSheet("create")}
-              className="press btn-primary flex min-h-14 items-center rounded-full px-6 text-[0.95rem]"
+            <Link
+              href="/login?next=/profile"
+              className="press btn-primary inline-flex min-h-14 items-center rounded-full px-6 text-[0.95rem]"
             >
               Claim a username
-            </button>
-            <button
-              onClick={() => setSheet("signin")}
-              className="press hoverable min-h-14 rounded-full border border-[var(--edge)] px-6 text-[0.95rem]"
+            </Link>
+            <Link
+              href="/login?mode=signin&next=/profile"
+              className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-[0.95rem]"
             >
               I have an account
-            </button>
+            </Link>
           </div>
         </section>
       )}
@@ -261,12 +260,6 @@ export default function Profile() {
         )}
       </section>
 
-      <AuthSheet
-        open={sheet !== null}
-        initialMode={sheet ?? "create"}
-        onClose={() => setSheet(null)}
-        onDone={() => load()}
-      />
     </div>
   );
 }

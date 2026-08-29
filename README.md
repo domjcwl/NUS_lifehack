@@ -128,6 +128,11 @@ lives. E-waste points *do* cover campus, which is a natural second phase.
 
 ## Accounts and friends
 
+Sign-in and account creation live on one page at **`/login`**, which takes an
+optional `?next=` (in-app paths only) and a `?mode=signin`. It is never the
+front door: the app opens straight into the bear, and `/login` is reached when
+you try to do something that needs an identity.
+
 **Guest first.** Opening the app mints a guest identity with a real session and a
 short seeded history, so the mechanic works before anyone signs up. Claiming a
 username converts that guest row **in place**, so the streak built as a guest

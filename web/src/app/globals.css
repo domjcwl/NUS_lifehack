@@ -130,7 +130,6 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
   border: 1px solid var(--edge);
   border-radius: 1.5rem;
   backdrop-filter: blur(18px) saturate(140%);
-  box-shadow: 0 1px 0 rgba(185, 228, 246, 0.14) inset;
 }
 
 /* Bigger surfaces read as thicker. */
@@ -138,9 +137,6 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
   border-radius: 1.85rem;
   border-color: var(--edge-bright);
   backdrop-filter: blur(28px) saturate(150%);
-  box-shadow:
-    0 1px 0 rgba(185, 228, 246, 0.2) inset,
-    0 24px 60px -30px rgba(0, 0, 0, 0.9);
 }
 
 .chrome-dark {
@@ -155,7 +151,7 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
  */
 .press {
   transition: transform 130ms var(--ease-out), background-color 130ms var(--ease-out),
-    opacity 130ms var(--ease-out), box-shadow 130ms var(--ease-out);
+    opacity 130ms var(--ease-out);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -165,7 +161,6 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
   background: linear-gradient(180deg, var(--ice) 0%, #8ecde6 100%);
   color: var(--night-0);
   font-weight: 600;
-  box-shadow: 0 10px 34px -12px rgba(185, 228, 246, 0.55);
 }
 
 /* Touch devices fire hover on tap, so gate hover states out of their way. */
@@ -248,7 +243,7 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
   place-items: center;
   border-radius: 999px;
   background: radial-gradient(circle at 35% 30%, #dff2fb 0%, #8ecde6 100%);
-  box-shadow: 0 0 0 1px rgba(3, 16, 26, 0.5), 0 0 22px -4px rgba(185, 228, 246, 0.75);
+  border: 1px solid rgba(3, 16, 26, 0.55);
   color: #03101a;
   font-family: var(--font-plex-mono), ui-monospace, monospace;
   font-size: 11px;

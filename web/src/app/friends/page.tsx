@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import AuthSheet, { type Me } from "@/components/AuthSheet";
 import Bear from "@/components/Bear";
+
 import { BEAR_COPY } from "@/lib/bear";
-import type { BearMood } from "@/lib/types";
+import type { BearMood, Me } from "@/lib/types";
 
 interface FriendState {
   id: string;
@@ -26,12 +27,12 @@ interface SearchHit {
 }
 
 export default function FriendsPage() {
+  const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
   const [mine, setMine] = useState<{ mood: BearMood; health: number; streak: number } | null>(null);
   const [friends, setFriends] = useState<FriendState[]>([]);
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[] | null>(null);
-  const [sheet, setSheet] = useState<"create" | "signin" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -66,7 +67,7 @@ export default function FriendsPage() {
   async function add(username: string | null) {
     if (!username) return;
     if (me?.isGuest) {
-      setSheet("create");
+      router.push("/login?next=/friends");
       return;
     }
     const res = await fetch("/api/friends", {
@@ -120,18 +121,18 @@ export default function FriendsPage() {
             you can sign in on any device.
           </p>
           <div className="mt-4 flex flex-wrap gap-2.5">
-            <button
-              onClick={() => setSheet("create")}
+            <Link
+              href="/login?next=/friends"
               className="press btn-primary flex min-h-14 items-center rounded-full px-6 text-[0.95rem]"
             >
               Claim a username
-            </button>
-            <button
-              onClick={() => setSheet("signin")}
-              className="press hoverable min-h-14 rounded-full border border-[var(--edge)] px-6 text-[0.95rem]"
+            </Link>
+            <Link
+              href="/login?mode=signin&next=/friends"
+              className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-[0.95rem]"
             >
               I have an account
-            </button>
+            </Link>
           </div>
         </section>
       ) : (
@@ -223,12 +224,6 @@ export default function FriendsPage() {
         Your profile and stats
       </Link>
 
-      <AuthSheet
-        open={sheet !== null}
-        initialMode={sheet ?? "create"}
-        onClose={() => setSheet(null)}
-        onDone={() => load()}
-      />
     </div>
   );
 }
