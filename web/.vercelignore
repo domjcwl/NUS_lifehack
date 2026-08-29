@@ -1,0 +1,11 @@
+# The local SQLite database never belongs in a deploy: it holds PIN hashes and
+# session tokens, and on Vercel the app writes to /tmp anyway, so uploading it
+# would ship real user data to serve no purpose. bins.json IS needed and stays.
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.db-journal
+
+.env
+.env.*
+!.env.example
