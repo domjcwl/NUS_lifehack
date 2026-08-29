@@ -122,7 +122,7 @@ export default function GroupPage() {
         {groups.length === 0 && (
           <p className="mt-2 max-w-[38ch] text-body leading-relaxed text-[var(--frost-dim)]">
             A group is your block, your flat or your family. Everyone keeps their own bear —
-            the group is where you see whose ice is holding.
+            the group is where you see whose ice is holding, and who is ahead.
           </p>
         )}
       </header>
@@ -198,67 +198,57 @@ export default function GroupPage() {
             </span>
           </button>
 
-          <div className="mt-4 flex justify-end gap-2.5">
-            {confirmLeavingGroupId === g.id ? (
-              <>
-                <button
-                  onClick={() => {
-                    setConfirmLeavingGroupId(null);
-                    void leaveGroup(g.id);
-                  }}
-                  disabled={busy}
-                  className="press hoverable min-h-12 rounded-full bg-[var(--coral)] px-4 text-body text-[var(--night-0)] disabled:opacity-40"
-                >
-                  Confirm leave
-                </button>
-                <button
-                  onClick={() => setConfirmLeavingGroupId(null)}
-                  disabled={busy}
-                  className="press hoverable min-h-12 rounded-full border border-[var(--edge)] px-4 text-body disabled:opacity-40"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setConfirmLeavingGroupId(g.id)}
-                disabled={busy}
-                className="press hoverable min-h-12 rounded-full border border-[var(--edge)] px-4 text-body text-[var(--coral)] disabled:opacity-40"
-              >
-                Leave group
-              </button>
-            )}
-          </div>
+          {/* The number needs explaining once, next to the thing it ranks —
+              a leaderboard whose score has no stated origin reads as arbitrary. */}
+          <p className="mono mt-5 text-label text-[var(--frost-faint)]">
+            10 points a scan · 5 more for the right bin · 25 every 7th day
+          </p>
 
-          <ul className="mt-5 space-y-3">
-            {[...g.members]
-              .sort((a, b) => b.streak - a.streak || b.xp - a.xp)
-              .map((m) => (
-                <li key={m.id} className="card pad-tight flex items-center gap-4">
-                  <div className="w-20 shrink-0">
-                    <Bear mood={m.mood} health={m.health} level={m.level} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate">
-                      @{m.username}
-                      {m.isYou && <span className="text-[var(--frost-faint)]"> · you</span>}
-                    </p>
-                    <p className="text-meta text-[var(--frost-dim)]">
-                      {BEAR_COPY[m.mood].title}
-                    </p>
-                    <p className="mono mt-1 text-label text-[var(--frost-faint)]">
-                      {m.stage} · level {m.level}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className="tnum text-head leading-none font-bold text-[var(--coral)]">
-                      {m.streak}
-                    </p>
-                    <p className="mono mt-1 text-label text-[var(--frost-faint)]">days</p>
-                  </div>
-                </li>
-              ))}
-          </ul>
+          <ol className="mt-3 space-y-3">
+            {ranked(g.members).map(({ member: m, rank }) => (
+              <li
+                key={m.id}
+                className={`card pad-tight flex items-center gap-3 ${
+                  m.isYou ? "border-[var(--edge-bright)]" : ""
+                }`}
+              >
+                {/* Rank first: a leaderboard's whole job is answering "where am
+                    I" before anything else on the row is read. */}
+                <p
+                  className={`tnum w-6 shrink-0 text-center text-sub font-bold ${
+                    rank === 1 ? "text-[var(--gold)]" : "text-[var(--frost-faint)]"
+                  }`}
+                >
+                  {rank}
+                </p>
+
+                {/* The bear stays on the row. The number says who is ahead; the
+                    animal says how they are actually doing, which is the thing
+                    this app is really about. */}
+                <div className="w-16 shrink-0">
+                  <Bear mood={m.mood} health={m.health} level={m.level} />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate">
+                    @{m.username}
+                    {m.isYou && <span className="text-[var(--frost-faint)]"> · you</span>}
+                  </p>
+                  <p className="text-meta text-[var(--frost-dim)]">{BEAR_COPY[m.mood].title}</p>
+                  <p className="mono mt-1 text-label text-[var(--frost-faint)]">
+                    {m.stage} · {m.streak}d streak
+                  </p>
+                </div>
+
+                <div className="shrink-0 text-right">
+                  <p className="tnum text-head leading-none font-bold text-[var(--frost)]">
+                    {m.xp.toLocaleString()}
+                  </p>
+                  <p className="mono mt-1 text-label text-[var(--frost-faint)]">points</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
       ))}
 
@@ -321,4 +311,28 @@ export default function GroupPage() {
       </Link>
     </div>
   );
+}
+
+/**
+ * Leaderboard order: points first, then the longer streak, then the name so the
+ * list never reshuffles between renders on a pure tie.
+ *
+ * Ties share a rank — two people on 240 points are both 2nd, and the next is
+ * 4th. Inventing an order between equal scores would be arbitrary, and the
+ * person who lost the coin flip can see that it was one.
+ */
+function ranked(members: Member[]): { member: Member; rank: number }[] {
+  const sorted = [...members].sort(
+    (a, b) =>
+      b.xp - a.xp ||
+      b.streak - a.streak ||
+      (a.username ?? a.displayName).localeCompare(b.username ?? b.displayName),
+  );
+  let rank = 0;
+  let prev: Member | null = null;
+  return sorted.map((member, i) => {
+    if (!prev || prev.xp !== member.xp || prev.streak !== member.streak) rank = i + 1;
+    prev = member;
+    return { member, rank };
+  });
 }

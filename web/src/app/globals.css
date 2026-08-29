@@ -196,6 +196,26 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
 }
 
 /*
+ * Keyboard focus. There was none: on a dark ground the browser default ring is
+ * close to invisible, so anyone navigating by keyboard or switch had no idea
+ * where they were. An outline rather than a shadow, because this app has no
+ * shadows, and offset so it reads around the shape instead of on top of it.
+ *
+ * :focus-visible, not :focus — a mouse press should not leave a ring behind.
+ */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--ice);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* The map's own controls sit inside Leaflet's DOM and miss the rule above. */
+.leaflet-container a:focus-visible {
+  outline: 2px solid var(--ice);
+  outline-offset: 1px;
+}
+
+/*
  * Every pressable gets instant feedback on pointer-down. Response is the
  * foundation — waiting for the click to acknowledge a press feels dead.
  */

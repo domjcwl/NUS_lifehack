@@ -340,3 +340,42 @@ Zoom 17, not the maximum: close enough that the bin is unambiguous, far enough t
 it stands on is still readable, which is what someone about to walk there needs. `flyTo` becomes
 an instant `setView` under reduced motion, and the scroll follows the same preference. The rows
 are real buttons now, so they work from a keyboard and announce themselves.
+
+## The group page became a leaderboard (Sat 29 Aug, ~21:30)
+
+Ranked on points, because points are what a scan produces: 10 for a verified action, 5 more for
+the right stream, 25 every seventh day. The rule is stated in one line above the board — a score
+whose origin is unexplained reads as arbitrary.
+
+**Ties share a rank.** Two people on 240 points are both 2nd and the next is 4th. Inventing an
+order between equal scores is arbitrary, and the person who lost the coin flip can see that it
+was one. Sort falls through points → streak → name, so the list never reshuffles between renders.
+
+**The bear stays on every row**, next to the score. This is the tension worth naming: the app's
+thesis is that points are not the reward, the bear is — and a leaderboard pulls the other way.
+Keeping the animal in the row is how both survive. The number says who is ahead; the bear says
+how they are actually doing, including when someone at the top of the board has a floe that is
+melting.
+
+## UI sharpening pass (Sat 29 Aug, ~22:00)
+
+**Keyboard focus was invisible.** No `:focus-visible` styling existed anywhere, and on a dark
+ground the browser default ring is close to unreadable — anyone navigating by keyboard or switch
+had no idea where they were. Now a 2px `--ice` outline with 2px offset, scoped with `:where()` so
+it costs no specificity, plus a rule for Leaflet's own controls, which sit outside the app's DOM.
+An outline rather than a shadow, because this app has no shadows. `:focus-visible` rather than
+`:focus`, so a mouse press does not leave a ring behind.
+
+**The scan verdict was announced to nobody.** It is the answer to the only question that screen
+asks, and it appeared silently. It is now an `aria-live="polite"` region — polite rather than
+assertive, so it follows what the user is doing instead of interrupting. Its error also gained
+`role="alert"`, which login and group already had; the most important error surface in the app
+was the one without it.
+
+**Radii collapsed to two.** `rounded-lg` on two inline notes and one hand-picked `rounded-[1.7rem]`
+card sat among a UI of `rounded-2xl` and `rounded-full`. Now 11 × `2xl` and 34 × `full`, nothing
+else. Loading skeletons likewise ran at three different opacities for one job; all are 50% now.
+
+Checked and found already sound: no `transition: all`, every tap target at or above the 44px
+floor, decorative SVGs hidden from assistive tech, images captioned, errors and the chart already
+carrying live regions.
