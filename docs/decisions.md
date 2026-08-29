@@ -299,3 +299,25 @@ a proxy's `x-forwarded-proto` still wins where there is one.
 The camera itself uses `<input type="file" accept="image/*" capture="environment">`, which
 opens the rear camera through the OS picker. That needs no HTTPS — unlike `getUserMedia` — so
 it works over plain http on the LAN, which is what makes a phone test possible at all.
+
+## The map reads as one thing at a time (Sat 29 Aug, ~20:00)
+
+With clustering gone the dots had a single fixed style, which meant the same mark was doing two
+different jobs badly. Zoomed out there are over a thousand and nobody is picking one out — they
+are showing where Singapore recycles, and at 6px with a dark rim and full opacity they piled up
+into a rash of bright blobs. Zoomed in there are a few dozen, each a place you might walk to.
+
+Size, stroke and opacity now follow zoom: 2.6px unstroked at 60% out at island level, where they
+overlap into density; 6.5px with a rim and full opacity from estate level in, where each is a
+destination. The rendering moved to an explicit canvas renderer with 8px of hit tolerance, so a
+small dot is still a tappable dot — a tap that lands on nothing reads as the app being broken
+rather than the user having missed.
+
+Tiles dropped to 82% opacity so the app's own ground shows through and the bins are the
+brightest thing on screen. The tiles are reference; the data is the subject.
+
+The location marker became a ring instead of a filled disc — it has to be findable without
+competing with what you came for. Zoom buttons are hidden on touch, where pinch already does
+the job and two floating squares sit on top of the only thing the screen is for. Attribution
+keeps its licence obligation but loses its plate, and the caption split in two: what you are
+looking at now on the left, the credit that is always true on the right.

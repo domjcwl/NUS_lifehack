@@ -2,16 +2,44 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CircleMarker, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 import clsx from "clsx";
 import type { Bin, BinKind, MapBin } from "@/lib/bins";
 import "leaflet/dist/leaflet.css";
 
 const SG_CENTRE: [number, number] = [1.3521, 103.8198];
 
+/*
+ * Canvas, with hit slop. Canvas because a thousand SVG paths is what makes a
+ * map stutter on a phone; the tolerance because a 2.6px dot zoomed out is a
+ * 2.6px tap target otherwise, and a tap that lands on nothing reads as the app
+ * being broken rather than as the user having missed. The module only ever
+ * loads in the browser — the map is imported with ssr:false.
+ */
+const RENDERER = L.canvas({ padding: 0.4, tolerance: 8 });
+
 const KIND_COLOUR: Record<BinKind, string> = {
   recycling: "#3ad9a6",
   ewaste: "#ff7d55",
 };
+
+/**
+ * A dot's size, weight and opacity all follow zoom, because the same mark is
+ * doing two different jobs.
+ *
+ * Zoomed out there are over a thousand of them and no one is picking one out —
+ * they are showing where Singapore recycles, and they should read as texture.
+ * Small, unstroked and semi-transparent, they overlap into density instead of
+ * piling into a rash of bright blobs.
+ *
+ * Zoomed in there are a few dozen and each is a place you might walk to, so it
+ * earns size, a dark rim to lift it off the map, and full opacity.
+ */
+function dotStyle(zoom: number) {
+  if (zoom <= 12) return { radius: 2.6, stroke: false, weight: 0, fillOpacity: 0.6 };
+  if (zoom <= 14) return { radius: 4, stroke: true, weight: 0.75, fillOpacity: 0.8 };
+  return { radius: 6.5, stroke: true, weight: 1.25, fillOpacity: 0.95 };
+}
 
 const FILTERS: { kind: BinKind; label: string }[] = [
   { kind: "recycling", label: "Recycling" },
@@ -35,6 +63,7 @@ export default function BinMap({
     capped: false,
   });
   const [me, setMe] = useState<[number, number] | null>(null);
+  const [zoom, setZoom] = useState(11);
   const toggle = onToggleKind;
 
   /* The map payload carries no names, so the tapped bin is fetched in full. It
@@ -50,6 +79,8 @@ export default function BinMap({
     },
     [onSelect],
   );
+
+  const dot = dotStyle(zoom);
 
   return (
     <div className="space-y-3">
@@ -82,7 +113,7 @@ export default function BinMap({
           minZoom={10}
           maxZoom={18}
           scrollWheelZoom
-          preferCanvas
+          renderer={RENDERER}
           style={{ height: "100%", width: "100%", background: "var(--night-1)" }}
           /* Singapore only — panning to open ocean helps nobody. */
           maxBounds={[
@@ -95,46 +126,59 @@ export default function BinMap({
             url="https://www.onemap.gov.sg/maps/tiles/Night/{z}/{x}/{y}.png"
             attribution='Map &copy; <a href="https://www.onemap.gov.sg/">OneMap</a> &copy; Singapore Land Authority'
             maxZoom={18}
+            /* Let the app's own ground show through. The tiles are reference,
+               not the subject — the bins should be the brightest thing here. */
+            opacity={0.82}
           />
           <Loader kinds={kinds} onView={setView} />
+          <ZoomWatch onZoom={setZoom} />
           <Locate onFound={setMe} />
 
           {view.points.map(([code, lat, lng, kind]) => (
             <CircleMarker
               key={code}
               center={[lat, lng]}
-              /* Small enough that a dense estate reads as texture rather than
-                 one blob, big enough to stay a comfortable tap target with the
-                 slack Leaflet allows around a path. */
-              radius={6}
+              radius={dot.radius}
               eventHandlers={{ click: () => void openBin(code) }}
               pathOptions={{
                 color: "#03101a",
-                weight: 1.25,
+                stroke: dot.stroke,
+                weight: dot.weight,
                 fillColor: kind === 1 ? KIND_COLOUR.ewaste : KIND_COLOUR.recycling,
-                fillOpacity: 0.95,
+                fillOpacity: dot.fillOpacity,
               }}
             />
           ))}
 
+          {/* You, as a ring rather than a filled disc — it has to be findable
+              without competing with the bins, which are what you came for. */}
           {me && (
             <CircleMarker
               center={me}
-              radius={8}
-              pathOptions={{ color: "#ffffff", weight: 3, fillColor: "#0d3b52", fillOpacity: 1 }}
+              radius={6}
+              pathOptions={{
+                color: "#ffffff",
+                weight: 2.5,
+                fillColor: "#b9e4f6",
+                fillOpacity: 0.35,
+              }}
             />
           )}
         </MapContainer>
       </div>
 
-      <p className="text-micro text-[var(--frost-dim)]">
-        {view.capped
-          ? `Showing ${view.points.length.toLocaleString()} of ${view.total.toLocaleString()} bins in view — zoom in for all of them. `
-          : view.total > 0
-            ? `${view.total.toLocaleString()} ${view.total === 1 ? "bin" : "bins"} in view. `
-            : ""}
-        Data: NEA via data.gov.sg.
-      </p>
+      {/* Two different things: what you are looking at right now, and the
+          credit that has to be there whatever the map is showing. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <p className="text-micro text-[var(--frost-dim)]">
+          {view.capped
+            ? `${view.points.length.toLocaleString()} of ${view.total.toLocaleString()} in view — zoom in for all`
+            : view.total > 0
+              ? `${view.total.toLocaleString()} ${view.total === 1 ? "bin" : "bins"} in view`
+              : " "}
+        </p>
+        <p className="text-micro text-[var(--frost-faint)]">NEA via data.gov.sg</p>
+      </div>
     </div>
   );
 }
@@ -173,6 +217,16 @@ function Loader({
     else onView({ points: [], total: 0, capped: false });
   }, [kindKey, load, onView]);
 
+  return null;
+}
+
+/** Zoom drives how the dots are drawn, so it is tracked on its own. */
+function ZoomWatch({ onZoom }: { onZoom: (z: number) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    onZoom(map.getZoom());
+  }, [map, onZoom]);
+  useMapEvents({ zoomend: () => onZoom(map.getZoom()) });
   return null;
 }
 
