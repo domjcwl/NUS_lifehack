@@ -45,8 +45,9 @@ export default function Bins() {
         <p className="mono text-[10px] text-[var(--ink-soft)]">Friction remover</p>
         <h1 className="mt-1 text-[1.6rem] font-semibold">Every bin in Singapore</h1>
         <p className="mt-1.5 text-[0.95rem] text-[var(--ink-soft)]">
-          13,006 recycling and e-waste points, straight from NEA. The most common reason
-          something recyclable goes in general waste is not knowing where the right bin is.
+          13,006 recycling and e-waste points, straight from NEA — including the blue bin at
+          the foot of your block. The most common reason something recyclable goes in general
+          waste is simply not knowing where the right bin is.
         </p>
       </header>
 

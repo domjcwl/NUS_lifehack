@@ -14,12 +14,16 @@ type DB = {
 
 const g = globalThis as unknown as { __ecodb?: DB };
 
+/**
+ * Scan anchors. These are real blue-bin locations from NEA's dataset — the demo
+ * point is a block you can actually stand at, not an invented one.
+ */
 export const BINS: Bin[] = [
-  { id: "com3-l1", name: "COM3 Level 1 Foyer", block: "COM3", lat: 1.29472, lng: 103.7745, streams: ["plastic", "paper", "metal"] },
-  { id: "com1-l2", name: "COM1 Level 2 Corridor", block: "COM1", lat: 1.29459, lng: 103.7739, streams: ["plastic", "paper"] },
-  { id: "utown-src", name: "UTown Stephen Riady Centre", block: "UTown", lat: 1.30432, lng: 103.7727, streams: ["plastic", "paper", "metal", "glass"] },
-  { id: "pgpr-blk9", name: "PGP Residences Block 9", block: "PGPR", lat: 1.29075, lng: 103.7808, streams: ["plastic", "paper", "metal"] },
-  { id: "eusoff-lobby", name: "Eusoff Hall Lobby", block: "Eusoff", lat: 1.29354, lng: 103.7712, streams: ["plastic", "paper"] },
+  { id: "tpe-826a", name: "Blk 826A Tampines Street 81", block: "Tampines", lat: 1.34919, lng: 103.93409, streams: ["plastic", "paper", "metal", "glass"] },
+  { id: "sk-407", name: "Blk 407 Fernvale Road", block: "Sengkang", lat: 1.38854, lng: 103.87505, streams: ["plastic", "paper", "metal"] },
+  { id: "rh-76", name: "Blk 76 Redhill Road", block: "Bukit Merah", lat: 1.28864, lng: 103.81634, streams: ["plastic", "paper", "metal"] },
+  { id: "wl-897e", name: "Blk 897E Woodlands Drive 50", block: "Woodlands", lat: 1.43566, lng: 103.79471, streams: ["plastic", "paper"] },
+  { id: "pg-110", name: "Blk 110 Punggol Field", block: "Punggol", lat: 1.39897, lng: 103.9111, streams: ["plastic", "paper", "metal"] },
 ];
 
 function seed(): DB {
@@ -30,7 +34,7 @@ function seed(): DB {
   const demo: User = {
     id: "demo",
     name: "You",
-    floor: "Eusoff Hall, Level 4",
+    floor: "Blk 826A Tampines St 81",
     baselineWeekly: 2,
     arm: "bear",
     joinedAt: now - 12 * DAY,

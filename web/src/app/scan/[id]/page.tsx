@@ -86,9 +86,9 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
           <Link href="/" className="mono press inline-block text-[10px] text-[var(--ink-soft)]">
             ← Nanuq
           </Link>
-          <h1 className="mt-2 text-[1.55rem] font-semibold">COM3 Level 1 Foyer</h1>
+          <h1 className="mt-2 text-[1.55rem] font-semibold">Blk 826A Tampines St 81</h1>
           <p className="mt-1 text-[0.95rem] text-[var(--ink-soft)]">
-            Hold the item at the bin and take one photo. This slot works once.
+            Hold the item at the blue bin and take one photo. This slot works once.
           </p>
         </div>
 

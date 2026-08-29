@@ -43,6 +43,19 @@ Fix is to move the folder outside OneDrive. Worth doing *before* the first depen
 
 ---
 
+### Sat ~12:50 — Audience moves from NUS students to HDB residents
+**Why:** the NEA data settled it. Their recycling-bin dataset covers HDB estates, so the
+nearest blue bin to NUS is ~1.1km away against ~125m in Tampines. A bin-anchored habit
+aimed at the one population without bins nearby is designing against our own evidence.
+The blue bin at the foot of an HDB block is the densest point-of-decision surface in
+Singapore.
+**What changed:** problem statement, README, in-app copy, chatbot system prompt, and the
+demo scan anchor (now Blk 826A Tampines Street 81, a real bin from the dataset).
+**What did not change:** the behaviour, the mechanics, and the measurement story. The
+poster insight still holds — HDB lift lobbies have the same dead posters hostels do.
+**Revisit if:** a judge pushes on the NUS connection. E-waste points *do* cover campus,
+so a campus phase is a natural extension rather than a retreat.
+
 ## TO ADD AT 11:00 (from `brief-triage`)
 
 ```

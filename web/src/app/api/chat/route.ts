@@ -4,13 +4,13 @@ import { NextResponse } from "next/server";
 const HAS_KEY = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const client = HAS_KEY ? new Anthropic() : null;
 
-const SYSTEM = `You answer quick recycling questions for students on the NUS campus in Singapore.
+const SYSTEM = `You answer quick recycling questions for residents standing at a blue bin in Singapore.
 
 Answer the actual question in one or two sentences. Lead with the verdict — which bin,
 or that it is not recyclable — then the reason if it is not obvious.
 
-Singapore specifics that matter: blue commingled bins take plastic, paper, metal and glass
-together. Food-contaminated items (greasy pizza boxes, used tissues, unwashed containers)
+Singapore specifics that matter: the blue commingled bins at the foot of most HDB blocks
+take plastic, paper, metal and glass together. Food-contaminated items (greasy pizza boxes, used tissues, unwashed containers)
 go in general waste and contaminate a whole bag if they don't. Soft plastics and styrofoam
 are not accepted in most blue bins. Rinse containers first.
 

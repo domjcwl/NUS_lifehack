@@ -7,9 +7,9 @@ A ten-second recycling habit, verified at the bin.
 
 ## The problem
 
-Every hostel corridor has a poster telling you to recycle. Everybody walks past it. The
-posters exist because they were the only instrument available for that spot — they sit at
-the exact point of decision but cannot do anything.
+Every HDB lift lobby has a poster telling you to recycle, and a blue bin a few steps away.
+Everybody walks past both. The poster exists because it was the only instrument available
+for that spot — it sits at the exact point of decision but cannot do anything.
 
 The brief says it plainly: *"the problem is not a lack of information, it is a lack of
 motivation and delight."* So Floe does not add more information. It replaces the poster
@@ -20,13 +20,14 @@ with something that acts.
 > Correctly sorting a recyclable item into the right bin, instead of dropping it in
 > general waste.
 
-**Audience:** students in NUS hostels and on campus.
+**Audience:** HDB residents in Singapore — the 80% of the population living within a
+minute's walk of one of the 12,291 blue bins in NEA's dataset.
 
 ## How it works
 
-1. **A code at the bin.** Scanning it mints a one-time slot tied to that bin — the
-   intervention is where and when the decision happens, not in an app you must remember
-   to open.
+1. **A code at the bin.** Scanning it mints a one-time slot tied to that specific blue
+   bin — the intervention is where and when the decision happens, not in an app you must
+   remember to open.
 2. **One photo.** Hold the item at the bin and shoot.
 3. **The model checks it.** Claude verifies a real recyclable is really going into a bin,
    and whether the stream is right. A slot can only be filled once.
@@ -91,18 +92,21 @@ a photo was checked when it wasn't.
 ### Walking through it
 
 1. Open `/` — Nanuq, the floe, your streak.
-2. Press **Scan the code at COM3 Level 1**. This stands in for a phone camera reading a
-   printed QR; it mints a real one-time scan instance.
+2. Press **Scan the code at Blk 826A**. This stands in for a phone camera reading a QR
+   printed on the bin; it mints a real one-time scan instance. Blk 826A Tampines Street 81
+   is a real blue-bin location from the NEA dataset.
 3. Take or upload a photo. It is validated, then logged, and the streak advances.
 4. Open `/bins` for the island-wide map — 13,006 real NEA points, clustered.
 5. Open `/impact` for the measurement story.
 
-### A note on coverage
+### Why HDB residents, and not students
 
-NEA's recycling-bin dataset covers **HDB estates**. Around NUS the nearest blue bin in the
-national data is ~1.1 km away (Clementi); in Tampines it is ~125 m. E-waste points *do*
-cover campus. This is a real gap, and it is part of why Floe mints its own scan points:
-the national dataset stops where campus begins.
+We started from a hostel poster, but the data moved us. NEA's recycling-bin dataset is
+**HDB estates**: the nearest blue bin to NUS in the national data is ~1.1 km away, against
+~125 m in Tampines. Aiming a bin-anchored habit at the one population that has no bins
+nearby would have been designing against our own evidence. The blue bin at the foot of an
+HDB block is the densest point-of-decision surface in Singapore, so that is where Floe
+lives. E-waste points *do* cover campus, which is a natural second phase.
 
 ## Project layout
 

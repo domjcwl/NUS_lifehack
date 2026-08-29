@@ -60,5 +60,5 @@ export async function POST(req: Request) {
 /** PUT /api/log — mint a fresh scan instance for a bin (what the QR encodes). */
 export async function PUT(req: Request) {
   const { binId } = (await req.json()) as { binId?: string };
-  return NextResponse.json(createInstance(binId ?? "com3-l1"));
+  return NextResponse.json(createInstance(binId ?? "tpe-826a"));
 }

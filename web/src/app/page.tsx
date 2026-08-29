@@ -30,7 +30,7 @@ export default function Home() {
       const inst = await fetch("/api/log", {
         method: "PUT",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ binId: "com3-l1" }),
+        body: JSON.stringify({ binId: "tpe-826a" }),
       }).then((r) => r.json());
       setScanUrl(`/scan/${inst.id}`);
     } finally {
@@ -68,7 +68,7 @@ export default function Home() {
           <p className="mono text-[10px] text-[var(--ink-soft)]">At the bin</p>
           <h2 className="mt-1 text-lg font-semibold">Scan, shoot, done.</h2>
           <p className="mt-1.5 text-[0.95rem] text-[var(--ink-soft)]">
-            Every recycling point has a code. Scanning it opens a one-time slot that only your
+            Every blue bin has a code on it. Scanning opens a one-time slot that only your
             photo can fill — which is what makes the count mean something.
           </p>
         </section>
@@ -112,7 +112,7 @@ export default function Home() {
               disabled={minting}
               className="press flex min-h-14 w-full items-center justify-center rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25 disabled:opacity-60"
             >
-              {minting ? "Opening…" : "Scan the code at COM3 L1"}
+              {minting ? "Opening…" : "Scan the code at Blk 826A"}
             </button>
           )}
         </div>
