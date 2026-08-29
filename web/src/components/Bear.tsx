@@ -31,10 +31,23 @@ const STARS = [
   [232, 52], [268, 30], [84, 62], [176, 60], [252, 14],
 ] as const;
 
-export default function Bear({ mood, health }: { mood: BearMood; health: number }) {
+export default function Bear({
+  mood,
+  health,
+  /** Health as it stood before the action that just landed, if there was one. */
+  fromHealth,
+}: {
+  mood: BearMood;
+  health: number;
+  fromHealth?: number;
+}) {
   const reduce = useReducedMotion();
   const cx = 150;
-  const rx = (68 + (health / 100) * 112) / 2;
+  const radius = (h: number) => (68 + (h / 100) * 112) / 2;
+  const rx = radius(health);
+  /* Without this the ellipses mount at their target and the ice appears to
+     teleport — the payoff the whole mechanic exists for is never witnessed. */
+  const fromRx = fromHealth === undefined ? undefined : radius(fromHealth);
   const [a1, a2] = SKY[mood];
 
   /* A little bounce is earned — the ice recovering is the payoff for logging. */
@@ -129,15 +142,25 @@ export default function Bear({ mood, health }: { mood: BearMood; health: number 
           cy={160}
           ry={40}
           fill="url(#iceGlow)"
+          initial={fromRx === undefined ? false : { rx: fromRx * 1.9 }}
           animate={{ rx: rx * 1.9 }}
           transition={spring}
         />
-        <motion.ellipse cx={cx} cy={161} ry={15} fill="#7fc3de" animate={{ rx }} transition={spring} />
+        <motion.ellipse
+          cx={cx}
+          cy={161}
+          ry={15}
+          fill="#7fc3de"
+          initial={fromRx === undefined ? false : { rx: fromRx }}
+          animate={{ rx }}
+          transition={spring}
+        />
         <motion.ellipse
           cx={cx}
           cy={155}
           ry={11}
           fill="#dff2fb"
+          initial={fromRx === undefined ? false : { rx: Math.max(0, fromRx - 7) }}
           animate={{ rx: Math.max(0, rx - 7) }}
           transition={spring}
         />

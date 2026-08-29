@@ -37,14 +37,20 @@ const FILTERS: { kind: BinKind; label: string }[] = [
   { kind: "lighting", label: "Lamps" },
 ];
 
-export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
-  const [kinds, setKinds] = useState<BinKind[]>(["recycling", "ewaste", "lighting"]);
+export default function BinMap({
+  onSelect,
+  kinds,
+  onToggleKind,
+}: {
+  onSelect?: (b: Bin) => void;
+  /* Owned by the page so the chips drive the nearby list too — they used to
+     change the map only, which made the filter quietly lie. */
+  kinds: BinKind[];
+  onToggleKind: (k: BinKind) => void;
+}) {
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [me, setMe] = useState<[number, number] | null>(null);
-
-  function toggle(k: BinKind) {
-    setKinds((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
-  }
+  const toggle = onToggleKind;
 
   return (
     <div className="space-y-3">

@@ -17,10 +17,16 @@ interface State {
 
 export default function Home() {
   const [s, setS] = useState<State | null>(null);
+  const [fromHealth, setFromHealth] = useState<number | undefined>(undefined);
   const [scanUrl, setScanUrl] = useState<string | null>(null);
   const [minting, setMinting] = useState(false);
 
   useEffect(() => {
+    const stashed = sessionStorage.getItem("floe:fromHealth");
+    if (stashed !== null) {
+      setFromHealth(Number(stashed));
+      sessionStorage.removeItem("floe:fromHealth");
+    }
     fetch("/api/log").then((r) => r.json()).then(setS);
   }, []);
 
@@ -53,10 +59,9 @@ export default function Home() {
     <>
       <div className="stagger space-y-4">
         <section className="card card-lg overflow-hidden">
-          <Bear mood={s.mood} health={s.health} />
+          <Bear mood={s.mood} health={s.health} fromHealth={fromHealth} />
 
           <div className="px-5 pb-5 pt-4">
-            <p className="mono text-[10px] text-[var(--frost-faint)]">{s.mood}</p>
             {/* The display face earns its keep at this size, not at 14px. */}
             <h1 className="mt-2 text-[2.6rem] leading-[0.98]">{copy.title}</h1>
             <p className="mt-2.5 max-w-[26ch] text-[0.98rem] text-[var(--frost-dim)]">
@@ -72,8 +77,7 @@ export default function Home() {
         </section>
 
         <section className="card px-5 py-5">
-          <p className="mono text-[10px] text-[var(--frost-faint)]">At the bin</p>
-          <h2 className="mt-1.5 text-[1.5rem]">Scan, shoot, done.</h2>
+          <h2 className="text-[1.5rem]">Scan, shoot, done.</h2>
           <p className="mt-2 text-[0.95rem] text-[var(--frost-dim)]">
             Every blue bin has a code on it. Scanning opens a one-time slot that only your
             photo can fill — which is what makes the count mean something.
@@ -82,7 +86,7 @@ export default function Home() {
 
         {s.recent.length > 0 && (
           <section className="card px-5 py-5">
-            <p className="mono text-[10px] text-[var(--frost-faint)]">Recent</p>
+            <h2 className="text-[1.05rem] text-[var(--frost-dim)]">Recent</h2>
             <ul className="mt-3.5 divide-y divide-[var(--edge)]">
               {s.recent.map((a) => (
                 <li key={a.id} className="flex items-baseline justify-between gap-3 py-2.5 first:pt-0 last:pb-0">

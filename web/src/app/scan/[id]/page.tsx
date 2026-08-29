@@ -52,6 +52,14 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
 
       setVerdict(v);
       if (v.verified) {
+        /* Hand the outgoing floe size to the home screen so the ice is seen
+           growing back rather than already grown. */
+        try {
+          const before = await fetch("/api/log").then((r) => r.json());
+          sessionStorage.setItem("floe:fromHealth", String(before.health));
+        } catch {
+          /* A missing handoff only costs the animation, never the log. */
+        }
         const logged = await fetch("/api/log", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -83,10 +91,10 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
     <>
       <div className="stagger space-y-4">
         <div>
-          <Link href="/" className="mono press inline-block text-[10px] text-[var(--frost-dim)]">
-            ← Nanuq
+          <Link href="/" className="press mono inline-block text-[10px] text-[var(--frost-dim)]">
+            Back to Nanuq
           </Link>
-          <h1 className="mt-2 text-[1.55rem] font-semibold">Blk 826A Tampines St 81</h1>
+          <h1 className="mt-2 text-[1.6rem]">Blk 826A Tampines St 81</h1>
           <p className="mt-1 text-[0.95rem] text-[var(--frost-dim)]">
             Hold the item at the blue bin and take one photo. This slot works once.
           </p>

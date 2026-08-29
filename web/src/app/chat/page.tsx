@@ -38,8 +38,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col gap-4 rise pb-20">
       <header>
-        <p className="mono text-[10px] text-[var(--frost-dim)]">At the point of decision</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Which bin?</h1>
+        <h1 className="text-[1.6rem]">Which bin?</h1>
         <p className="mt-2 text-sm text-[var(--frost-dim)]">
           Hesitation is where recyclables end up in general waste. Ask and go.
         </p>

@@ -21,8 +21,7 @@ export default function Impact() {
     <div className="space-y-10">
       {/* The one number the page leads with. */}
       <header className="rise">
-        <p className="mono text-[10px] text-[var(--frost-faint)]">Did it change behaviour</p>
-        <div className="mt-3 flex items-end gap-3">
+        <div className="flex items-end gap-3">
           <span className="tnum text-[5rem] leading-[0.82] font-bold tracking-[-0.05em] text-[var(--aurora-1)]">
             +{ACTUAL_LIFT}
             <span className="text-[2.5rem]">%</span>
@@ -43,7 +42,7 @@ export default function Impact() {
 
       {/* How it was measured. */}
       <section className="rise">
-        <SectionHead n="01" title="The metric" />
+        <SectionHead title="The metric" />
         <p className="mt-3 text-[0.95rem] text-[var(--frost-dim)]">
           <strong className="font-semibold text-[var(--frost)]">
             Verified recycling actions per person per week.
@@ -61,7 +60,7 @@ export default function Impact() {
 
       {/* Where the line settles once novelty wears off. */}
       <section className="rise">
-        <SectionHead n="02" title="Where it settles" />
+        <SectionHead title="Where it settles" />
         <p className="mt-3 mb-5 text-[0.95rem] text-[var(--frost-dim)]">
           Week one is novelty — every habit app gets that. The question this design cares
           about is where the line lands afterwards, and whether it lands above the control.
@@ -78,7 +77,7 @@ export default function Impact() {
       </section>
 
       <section className="rise">
-        <SectionHead n="03" title="Day 30, not day 1" />
+        <SectionHead title="Day 30, not day 1" />
         <p className="mt-3 mb-5 text-[0.95rem] text-[var(--frost-dim)]">
           Most habit apps are abandoned inside a week. Retention is the criterion that
           separates a mechanic from a novelty.
@@ -128,7 +127,7 @@ export default function Impact() {
 
       {/* Targets, stated in advance so they can be missed. */}
       <section className="rise">
-        <SectionHead n="04" title="Targets, set in advance" />
+        <SectionHead title="Targets, set in advance" />
         <ul className="mt-4 space-y-3">
           <Target
             hit={ACTUAL_LIFT >= TARGET_LIFT}
@@ -142,13 +141,12 @@ export default function Impact() {
           />
         </ul>
         <p className="mt-4 text-[0.9rem] text-[var(--frost-dim)]">
-          Written down before the data existed, so they can be missed. A target you can only
-          pass is not a target.
+          Both were written down before any data existed, so either one could have failed.
         </p>
       </section>
 
       <section className="card rise px-5 py-5">
-        <SectionHead n="05" title="How we would know it is the bear" />
+        <SectionHead title="How we would know it is the bear" />
         <p className="mt-3 text-[0.95rem] text-[var(--frost-dim)]">
           Half the cohort gets the full mechanic; half gets logging with no bear, no streak,
           no floe. Both arms are instrumented identically. Without that split, any lift could
@@ -159,9 +157,7 @@ export default function Impact() {
 
       {/* Deliberately last, deliberately quiet. */}
       <section className="rise pb-2">
-        <p className="mono text-[10px] text-[var(--frost-faint)]">
-          Vanity metrics · not the point
-        </p>
+        <h2 className="text-[1.05rem] text-[var(--frost-dim)]">Vanity metrics — not the point</h2>
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 opacity-45">
           {VANITY.map((v) => (
             <p key={v.label} className="text-[0.85rem] text-[var(--frost-dim)]">
@@ -170,21 +166,16 @@ export default function Impact() {
           ))}
         </div>
         <p className="mt-3 max-w-[38ch] text-[0.85rem] text-[var(--frost-faint)]">
-          These rise when a product is fun. They can rise while nobody recycles more, which
-          is exactly why they are down here and the number at the top is not.
+          All three rise when a product is fun, and all three can rise in a week where nobody
+          recycled anything extra. That is why they sit at the bottom of this screen.
         </p>
       </section>
     </div>
   );
 }
 
-function SectionHead({ n, title }: { n: string; title: string }) {
-  return (
-    <div className="flex items-baseline gap-3">
-      <span className="mono text-[10px] text-[var(--frost-faint)]">{n}</span>
-      <h2 className="text-[1.35rem]">{title}</h2>
-    </div>
-  );
+function SectionHead({ title }: { title: string }) {
+  return <h2 className="text-[1.35rem]">{title}</h2>;
 }
 
 function Cell({ label, value, accent }: { label: string; value: string; accent?: boolean }) {

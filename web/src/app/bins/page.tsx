@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import type { Bin } from "@/lib/bins";
+import type { Bin, BinKind } from "@/lib/bins";
 
 /* Leaflet touches window on import, so it can never render on the server. */
 const BinMap = dynamic(() => import("@/components/BinMap"), {
@@ -12,10 +12,16 @@ const BinMap = dynamic(() => import("@/components/BinMap"), {
 
 type NearBin = Bin & { metres: number };
 
+const ALL_KINDS: BinKind[] = ["recycling", "ewaste", "lighting"];
+
 export default function Bins() {
+  const [kinds, setKinds] = useState<BinKind[]>(ALL_KINDS);
   const [near, setNear] = useState<NearBin[] | null>(null);
   const [status, setStatus] = useState("Finding you…");
   const [selected, setSelected] = useState<Bin | null>(null);
+
+  const toggleKind = (k: BinKind) =>
+    setKinds((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]));
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -26,7 +32,8 @@ export default function Bins() {
     navigator.geolocation.getCurrentPosition(
       async (p) => {
         const res = await fetch(
-          `/api/bins?lat=${p.coords.latitude}&lng=${p.coords.longitude}&limit=8`,
+          `/api/bins?lat=${p.coords.latitude}&lng=${p.coords.longitude}&limit=8` +
+            `&types=${kinds.join(",")}`,
         ).then((r) => r.json());
         setNear(res.bins ?? []);
         setStatus("Closest to you right now.");
@@ -37,13 +44,12 @@ export default function Bins() {
       },
       { timeout: 6000 },
     );
-  }, []);
+  }, [kinds]);
 
   return (
     <div className="stagger space-y-5">
       <header>
-        <p className="mono text-[10px] text-[var(--frost-dim)]">Friction remover</p>
-        <h1 className="mt-1 text-[1.6rem] font-semibold">Every bin in Singapore</h1>
+        <h1 className="text-[1.6rem]">Every bin in Singapore</h1>
         <p className="mt-1.5 text-[0.95rem] text-[var(--frost-dim)]">
           13,006 recycling and e-waste points, straight from NEA — including the blue bin at
           the foot of your block. The most common reason something recyclable goes in general
@@ -51,7 +57,7 @@ export default function Bins() {
         </p>
       </header>
 
-      <BinMap onSelect={setSelected} />
+      <BinMap onSelect={setSelected} kinds={kinds} onToggleKind={toggleKind} />
 
       {selected && (
         <section className="card px-5 py-4">
