@@ -9,7 +9,6 @@ const TABS = [
   { href: "/", label: "Nanuq", icon: BearIcon },
   { href: "/bins", label: "Bins", icon: PinIcon },
   { href: "/chat", label: "Ask", icon: ChatIcon },
-  { href: "/news", label: "Learn", icon: BookIcon },
   { href: "/group", label: "Group", icon: HeartIcon },
   { href: "/impact", label: "Impact", icon: ChartIcon },
 ];
@@ -43,7 +42,7 @@ export default function TabBar() {
                 <Icon filled={active} />
                 <span
                   className={clsx(
-                    "text-[10px] tracking-tight",
+                    "text-micro tracking-tight",
                     active ? "font-semibold" : "font-medium",
                   )}
                 >
@@ -101,16 +100,6 @@ function ChatIcon({ filled }: IconProps) {
     <svg {...box} aria-hidden>
       <path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3Z" fill={filled ? "currentColor" : "none"} opacity={filled ? 0.18 : 1} />
       <path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3Z" />
-    </svg>
-  );
-}
-
-function BookIcon({ filled }: IconProps) {
-  return (
-    <svg {...box} aria-hidden>
-      <path d="M4 5a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" fill={filled ? "currentColor" : "none"} opacity={filled ? 0.18 : 1} />
-      <path d="M4 5a2 2 0 0 1 2-2h11v16H6a2 2 0 0 0-2 2Z" />
-      <path d="M17 3h1a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6" />
     </svg>
   );
 }

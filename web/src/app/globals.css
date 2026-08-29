@@ -32,6 +32,43 @@
   --safe-b: env(safe-area-inset-bottom, 0px);
 }
 
+/*
+ * Type scale. Seven steps, named for their job rather than their size, so a
+ * screen picks a role and the scale decides the number. Before this the app
+ * carried 24 hand-picked sizes — 0.9, 0.92, 0.95, 0.98 and 1rem all coexisted,
+ * differences too small to read as intent but enough to stop anything lining up.
+ *
+ * `body` is 16px because that is the floor below which iOS zooms the viewport
+ * on input focus, and because the brief's reader is at arm's length in a bright
+ * corridor. Nothing load-bearing sits below `meta`.
+ */
+@theme {
+  /* Mono uppercase labels only. Runs one step below `micro` because the caps
+     and 0.1em tracking of `.mono` make it read larger than its size suggests.
+     This replaces the 8/9/10/11px labels that were doing one job at four sizes;
+     8px was below legible for a phone held at arm's length. */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.35;
+  --text-micro: 0.75rem;
+  --text-micro--line-height: 1.4;
+  --text-meta: 0.875rem;
+  --text-meta--line-height: 1.45;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-sub: 1.25rem;
+  --text-sub--line-height: 1.3;
+  --text-sub--letter-spacing: -0.01em;
+  --text-head: 1.5rem;
+  --text-head--line-height: 1.18;
+  --text-head--letter-spacing: -0.022em;
+  --text-title: 2.25rem;
+  --text-title--line-height: 1.02;
+  --text-title--letter-spacing: -0.032em;
+  --text-mega: 4.5rem;
+  --text-mega--line-height: 0.82;
+  --text-mega--letter-spacing: -0.05em;
+}
+
 @theme inline {
   --color-night-0: var(--night-0);
   --color-night-1: var(--night-1);
@@ -131,6 +168,19 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
   border-radius: 1.5rem;
   backdrop-filter: blur(18px) saturate(140%);
 }
+
+/*
+ * Indentation. The page gutter is 1rem (layout.tsx), so a card's inner padding
+ * decides how far text sits from the screen edge. The app previously used seven
+ * different values — px-2 through px-6 — which meant the first character of
+ * every screen landed somewhere new as you moved between tabs.
+ *
+ * Two steps only. `pad` is the default; `pad-tight` is for dense repeating rows
+ * where the full inset would waste a phone's width. Media that bleeds to the
+ * card edge (the map, the bear) takes neither.
+ */
+.pad { padding: 1.25rem; }
+.pad-tight { padding: 0.875rem 1rem; }
 
 /* Bigger surfaces read as thicker. */
 .card-lg {

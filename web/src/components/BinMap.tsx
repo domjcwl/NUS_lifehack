@@ -61,7 +61,7 @@ export default function BinMap({
               onClick={() => toggle(f.kind)}
               aria-pressed={on}
               className={clsx(
-                "press min-h-11 rounded-full border px-4 text-[0.85rem] font-medium",
+                "press min-h-11 rounded-full border px-4 text-meta font-medium",
                 on
                   ? "border-transparent text-[var(--night-0)] font-semibold"
                   : "border-[var(--edge)] bg-[var(--night-3)]/50 text-[var(--frost-dim)]",
@@ -132,7 +132,7 @@ export default function BinMap({
         </MapContainer>
       </div>
 
-      <p className="text-[11px] text-[var(--frost-dim)]">
+      <p className="text-micro text-[var(--frost-dim)]">
         Circles group nearby points — zoom in to split them. Data: NEA via data.gov.sg.
       </p>
     </div>

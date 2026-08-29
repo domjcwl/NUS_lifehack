@@ -93,10 +93,10 @@ function LoginForm() {
       </section>
 
       <header className="rise">
-        <h1 className="text-[2.1rem]">
+        <h1 className="text-title">
           {mode === "create" ? "Claim your bear" : "Welcome back"}
         </h1>
-        <p className="mt-2 max-w-[36ch] text-[1rem] leading-relaxed text-[var(--frost-dim)]">
+        <p className="mt-2 max-w-[36ch] text-body leading-relaxed text-[var(--frost-dim)]">
           {mode === "create" ? (
             isGuest && bear && bear.streak > 0 ? (
               <>
@@ -115,7 +115,7 @@ function LoginForm() {
 
       <form onSubmit={submit} className="rise space-y-4">
         <div>
-          <label htmlFor="username" className="text-[0.9rem] text-[var(--frost-dim)]">
+          <label htmlFor="username" className="text-body text-[var(--frost-dim)]">
             Username
           </label>
           <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[var(--edge)] bg-[var(--night-2)] px-4">
@@ -131,12 +131,12 @@ function LoginForm() {
               autoComplete="username"
               placeholder="your_username"
               /* 16px minimum, or iOS zooms the viewport on focus. */
-              className="min-h-14 flex-1 bg-transparent text-base outline-none"
+              className="min-h-14 flex-1 bg-transparent text-body outline-none"
             />
           </div>
           {mode === "create" && avail && (
             <p
-              className={`mt-2 text-[0.85rem] ${
+              className={`mt-2 text-meta ${
                 avail.ok ? "text-[var(--aurora-1)]" : "text-[var(--coral)]"
               }`}
             >
@@ -146,7 +146,7 @@ function LoginForm() {
         </div>
 
         <div>
-          <label htmlFor="pin" className="text-[0.9rem] text-[var(--frost-dim)]">
+          <label htmlFor="pin" className="text-body text-[var(--frost-dim)]">
             PIN — 4 to 8 digits
           </label>
           <input
@@ -157,12 +157,12 @@ function LoginForm() {
             type="password"
             autoComplete={mode === "create" ? "new-password" : "current-password"}
             placeholder="••••"
-            className="mt-2 min-h-14 w-full rounded-2xl border border-[var(--edge)] bg-[var(--night-2)] px-4 text-base tracking-[0.4em] outline-none"
+            className="mt-2 min-h-14 w-full rounded-2xl border border-[var(--edge)] bg-[var(--night-2)] px-4 text-body tracking-[0.4em] outline-none"
           />
         </div>
 
         {error && (
-          <p role="alert" className="text-[0.9rem] text-[var(--coral)]">
+          <p role="alert" className="text-body text-[var(--coral)]">
             {error}
           </p>
         )}
@@ -170,7 +170,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={!canSubmit || busy}
-          className="press btn-primary flex min-h-14 w-full items-center justify-center rounded-full text-[0.95rem] disabled:opacity-40"
+          className="press btn-primary flex min-h-14 w-full items-center justify-center rounded-full text-body disabled:opacity-40"
         >
           {busy ? "One moment…" : mode === "create" ? "Create account" : "Sign in"}
         </button>
@@ -183,18 +183,18 @@ function LoginForm() {
             setError(null);
             setAvail(null);
           }}
-          className="press min-h-11 text-[0.95rem] text-[var(--frost-dim)] underline decoration-[var(--edge-bright)] underline-offset-4"
+          className="press min-h-11 text-body text-[var(--frost-dim)] underline decoration-[var(--edge-bright)] underline-offset-4"
         >
           {mode === "create" ? "I already have an account" : "Create an account instead"}
         </button>
 
         <p>
-          <Link href="/" className="press min-h-11 text-[0.95rem] text-[var(--frost-faint)]">
+          <Link href="/" className="press min-h-11 text-body text-[var(--frost-faint)]">
             Keep looking around as a guest
           </Link>
         </p>
 
-        <p className="max-w-[40ch] text-[0.8rem] text-[var(--frost-faint)]">
+        <p className="max-w-[40ch] text-meta text-[var(--frost-faint)]">
           Prototype sign-in. A PIN is not real security and there is no rate limiting — see the
           README before judging it as one.
         </p>

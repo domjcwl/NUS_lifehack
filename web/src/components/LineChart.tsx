@@ -57,7 +57,7 @@ export default function LineChart({ series, ticks, format = String, yMax, captio
               className="size-2 rounded-full"
               style={{ background: s.emphasis ? ACCENT : CONTEXT }}
             />
-            <span className="mono text-[9px] text-[var(--frost-dim)]">{s.label}</span>
+            <span className="mono text-label text-[var(--frost-dim)]">{s.label}</span>
           </span>
         ))}
       </div>
@@ -165,7 +165,7 @@ export default function LineChart({ series, ticks, format = String, yMax, captio
       {/* Tooltip lives outside the SVG so it inherits real text styling. */}
       <div className="mt-2 min-h-[1.35rem]" aria-live="polite">
         {hover !== null && (
-          <p className="mono text-[9px] text-[var(--frost-dim)]">
+          <p className="mono text-label text-[var(--frost-dim)]">
             {ticks[hover]}
             {series.map((s) => (
               <span key={s.label} className="ml-3">

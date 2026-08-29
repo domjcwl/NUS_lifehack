@@ -213,3 +213,32 @@ suite went from 24s to 0.06s. Dependencies dropped from 18 to 11.
 **QR sticker generator dropped for good** (Dom, 15:45): not ported to web's scan URLs.
 Nothing in the repo now produces a printable QR. The underlying conflict is still open —
 web's `/scan/{id}` consumes a single-use instance, so a sticker glued to a bin works once.
+## Learn tab cut (Sat 29 Aug, ~17:00)
+
+The news feed is gone — tab, `/news`, and the `/prototypes/learn` surface that existed to
+choose its design. This finishes the reasoning already in the build order above: it was P4
+because "the brief says information is not the problem". A tab that does the one thing the
+brief says does not work was costing a sixth of the nav bar and a judge's attention. Five
+tabs now: Nanuq, Bins, Ask, Group, Impact.
+
+Recoverable from git if it turns out to be wanted.
+
+## One type scale, two insets (Sat 29 Aug, ~17:00)
+
+The app had **28 distinct font sizes** across 125 usages — `0.9`, `0.92`, `0.95`, `0.98` and
+`1rem` all coexisting, differences too small to read as intent but enough that nothing lined
+up. Labels did one job at four sizes (8/9/10/11px), and 8px is not legible on a phone held at
+arm's length in a corridor.
+
+Now eight steps in `@theme`, named for their job (`label`, `micro`, `meta`, `body`, `sub`,
+`head`, `title`, `mega`), so a screen picks a role and the scale picks the number. `body` is
+16px: the floor below which iOS zooms the viewport on input focus.
+
+Indentation was the worse half. The page gutter is 1rem, but card insets ran `px-2` through
+`px-6` — seven values, so the first character of every screen landed somewhere new as you
+moved between tabs. Two steps now: `.pad` (1.25rem) and `.pad-tight` (0.875rem/1rem) for dense
+rows. Pill buttons keep `px-6`, inputs take `px-4`; those are component padding, not indentation.
+
+One deliberate exception, marked in the file: the scan screen's `h1` stays one step down. It is
+a bin address that can run long, and that screen is the one-handed path at the bin — the camera
+button has to stay above the fold.

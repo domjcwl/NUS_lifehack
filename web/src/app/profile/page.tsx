@@ -89,10 +89,10 @@ export default function Profile() {
       <section className="rise">
         <div className="card card-lg overflow-hidden">
           <Bear mood={data.mood} health={data.health} level={data.level} />
-          <div className="px-5 pb-5 pt-4">
+          <div className="pad">
             {editing ? (
               <div>
-                <label htmlFor="uname" className="mono text-[10px] text-[var(--frost-faint)]">
+                <label htmlFor="uname" className="mono text-label text-[var(--frost-faint)]">
                   Username
                 </label>
                 <div className="mt-1.5 flex items-center gap-2 rounded-2xl border border-[var(--edge)] bg-[var(--night-2)] px-4">
@@ -105,15 +105,15 @@ export default function Profile() {
                     autoCorrect="off"
                     spellCheck={false}
                     /* 16px minimum, or iOS zooms the viewport on focus. */
-                    className="min-h-14 flex-1 bg-transparent text-base outline-none"
+                    className="min-h-14 flex-1 bg-transparent text-body outline-none"
                   />
                 </div>
-                {error && <p className="mt-2 text-[0.85rem] text-[var(--coral)]">{error}</p>}
+                {error && <p className="mt-2 text-meta text-[var(--coral)]">{error}</p>}
                 <div className="mt-3 flex gap-2.5">
                   <button
                     onClick={save}
                     disabled={saving || draft.length < 3}
-                    className="press btn-primary min-h-12 flex-1 rounded-full text-[0.9rem] disabled:opacity-40"
+                    className="press btn-primary min-h-12 flex-1 rounded-full text-body disabled:opacity-40"
                   >
                     {saving ? "Saving…" : "Save"}
                   </button>
@@ -122,7 +122,7 @@ export default function Profile() {
                       setEditing(false);
                       setError(null);
                     }}
-                    className="press hoverable min-h-12 rounded-full border border-[var(--edge)] px-5 text-[0.9rem]"
+                    className="press hoverable min-h-12 rounded-full border border-[var(--edge)] px-6 text-body"
                   >
                     Cancel
                   </button>
@@ -131,10 +131,10 @@ export default function Profile() {
             ) : (
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h1 className="truncate text-[2rem]">
+                  <h1 className="truncate text-title">
                     {user.isGuest ? "Guest" : `@${user.username}`}
                   </h1>
-                  <p className="mt-1 text-[0.95rem] text-[var(--frost-dim)]">
+                  <p className="mt-1 text-body text-[var(--frost-dim)]">
                     {BEAR_COPY[data.mood].title}
                   </p>
                 </div>
@@ -144,7 +144,7 @@ export default function Profile() {
                       setDraft(user.username ?? "");
                       setEditing(true);
                     }}
-                    className="press hoverable min-h-11 shrink-0 rounded-full border border-[var(--edge)] px-4 text-[0.85rem]"
+                    className="press hoverable min-h-11 shrink-0 rounded-full border border-[var(--edge)] px-4 text-meta"
                   >
                     Edit
                   </button>
@@ -157,21 +157,21 @@ export default function Profile() {
 
       {user.isGuest && (
         <section className="rise">
-          <h2 className="text-[1.35rem]">You are browsing as a guest</h2>
-          <p className="mt-2 max-w-[40ch] text-[0.95rem] text-[var(--frost-dim)]">
+          <h2 className="text-head">You are browsing as a guest</h2>
+          <p className="mt-2 max-w-[40ch] text-body text-[var(--frost-dim)]">
             Everything below is real and yours, but it lives only in this browser. Claim a
             username and it follows you to any device.
           </p>
           <div className="mt-4 flex flex-wrap gap-2.5">
             <Link
               href="/login?next=/profile"
-              className="press btn-primary inline-flex min-h-14 items-center rounded-full px-6 text-[0.95rem]"
+              className="press btn-primary inline-flex min-h-14 items-center rounded-full px-6 text-body"
             >
               Claim a username
             </Link>
             <Link
               href="/login?mode=signin&next=/profile"
-              className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-[0.95rem]"
+              className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-body"
             >
               I have an account
             </Link>
@@ -181,8 +181,8 @@ export default function Profile() {
 
       {/* Prose first — a rate means nothing without the span it was measured over. */}
       <section className="rise">
-        <h2 className="text-[1.35rem]">The record</h2>
-        <p className="mt-3 max-w-[44ch] text-[1rem] leading-relaxed text-[var(--frost-dim)]">
+        <h2 className="text-head">The record</h2>
+        <p className="mt-3 max-w-[44ch] text-body leading-relaxed text-[var(--frost-dim)]">
           {stats.total === 0 ? (
             "Nothing logged yet. Scan the code on a blue bin and the first one lands here."
           ) : (
@@ -210,7 +210,7 @@ export default function Profile() {
 
       {stats.materials.length > 0 && (
         <section className="rise">
-          <h2 className="text-[1.35rem]">What you bin</h2>
+          <h2 className="text-head">What you bin</h2>
           <div className="mt-4 flex h-3 gap-0.5 overflow-hidden rounded-full">
             {stats.materials.map((m) => (
               <div
@@ -225,7 +225,7 @@ export default function Profile() {
           </div>
           <ul className="mt-4 space-y-2">
             {stats.materials.map((m) => (
-              <li key={m.material} className="flex items-center gap-2.5 text-[0.92rem]">
+              <li key={m.material} className="flex items-center gap-2.5 text-body">
                 <span
                   aria-hidden
                   className="size-2.5 shrink-0 rounded-full"
@@ -238,7 +238,7 @@ export default function Profile() {
               </li>
             ))}
           </ul>
-          <p className="mt-4 max-w-[42ch] text-[0.85rem] text-[var(--frost-faint)]">
+          <p className="mt-4 max-w-[42ch] text-meta text-[var(--frost-faint)]">
             Grouped by keyword from what the verifier read in each photo, so an unusual item may
             land in “other”.
           </p>
@@ -248,7 +248,7 @@ export default function Profile() {
       <section className="rise flex flex-wrap gap-2.5 border-t border-[var(--edge)] pt-7">
         <Link
           href="/group"
-          className="press hoverable min-h-14 rounded-full border border-[var(--edge)] px-6 text-[0.95rem] leading-[3.5rem]"
+          className="press hoverable min-h-14 rounded-full border border-[var(--edge)] px-6 text-body leading-[3.5rem]"
         >
           Group
         </Link>
@@ -258,7 +258,7 @@ export default function Profile() {
               await fetch("/api/auth/logout", { method: "POST" });
               load();
             }}
-            className="press min-h-14 px-2 text-[0.95rem] text-[var(--frost-faint)]"
+            className="press min-h-14 px-2 text-body text-[var(--frost-faint)]"
           >
             Sign out
           </button>
@@ -287,16 +287,16 @@ function Row({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-3.5">
-      <dt className="text-[0.95rem] text-[var(--frost-dim)]">{label}</dt>
+      <dt className="text-body text-[var(--frost-dim)]">{label}</dt>
       <dd className="text-right">
         <span
-          className={`tnum text-[1.1rem] font-semibold ${
+          className={`tnum text-sub font-semibold ${
             accent ? "text-[var(--coral)]" : "text-[var(--frost)]"
           }`}
         >
           {value}
         </span>
-        {note && <span className="ml-2 text-[0.8rem] text-[var(--frost-faint)]">{note}</span>}
+        {note && <span className="ml-2 text-meta text-[var(--frost-faint)]">{note}</span>}
       </dd>
     </div>
   );

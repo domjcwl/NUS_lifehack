@@ -98,11 +98,15 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
     <>
       <div className="stagger space-y-4">
         <div>
-          <Link href="/" className="press mono inline-block text-[10px] text-[var(--frost-dim)]">
+          <Link href="/" className="press mono inline-block text-label text-[var(--frost-dim)]">
             Back to Nanuq
           </Link>
-          <h1 className="mt-2 text-[1.6rem]">Blk 826A Tampines St 81</h1>
-          <p className="mt-1 text-[0.95rem] text-[var(--frost-dim)]">
+          {/* One step below the app's page-title size on purpose: this is a
+              dynamic bin address that can run long, and this screen is the
+              one-handed path at the bin — the camera button has to stay
+              above the fold. */}
+          <h1 className="mt-2 text-head">Blk 826A Tampines St 81</h1>
+          <p className="mt-1 text-body text-[var(--frost-dim)]">
             Hold the item at the blue bin and take one photo. This slot works once.
           </p>
         </div>
@@ -112,16 +116,16 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             <img src={preview} alt="Your photo" className="aspect-[4/3] w-full object-cover" />
           ) : (
             <div className="flex aspect-[4/3] items-center justify-center bg-[var(--night-3)]">
-              <p className="mono text-[10px] text-[var(--frost-dim)]">No photo yet</p>
+              <p className="mono text-label text-[var(--frost-dim)]">No photo yet</p>
             </div>
           )}
 
           {(phase === "checking" || phase === "done") && (
-            <div className="px-5 py-5">
+            <div className="pad">
               {phase === "checking" && (
                 <div className="flex items-center gap-2.5">
                   <span className="size-2 animate-pulse rounded-full bg-[var(--aurora-2)]" />
-                  <p className="mono text-[11px] text-[var(--aurora-2)]">Checking the photo…</p>
+                  <p className="mono text-label text-[var(--aurora-2)]">Checking the photo…</p>
                 </div>
               )}
 
@@ -134,13 +138,13 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
                   className="space-y-3"
                 >
                   <p
-                    className={`mono text-[11px] ${
+                    className={`mono text-label ${
                       verdict.verified ? "text-[var(--aurora-2)]" : "text-[var(--coral)]"
                     }`}
                   >
                     {verdict.verified ? "Verified" : "Not counted"}
                   </p>
-                  <p className="text-[0.95rem]">{verdict.reason}</p>
+                  <p className="text-body">{verdict.reason}</p>
 
                   {verdict.verified && streak !== null && (
                     <div className="flex items-baseline gap-2">
@@ -148,23 +152,23 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
                         initial={reduce ? false : { scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: "spring", bounce: 0.35, duration: 0.5, delay: 0.12 }}
-                        className="text-4xl font-semibold tabular-nums text-[var(--coral)]"
+                        className="text-title font-semibold tabular-nums text-[var(--coral)]"
                       >
                         {streak}
                       </motion.span>
-                      <span className="mono text-[10px] text-[var(--frost-dim)]">day streak</span>
+                      <span className="mono text-label text-[var(--frost-dim)]">day streak</span>
                     </div>
                   )}
 
                   {verdict.stubbed && (
-                    <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-[11px] text-[var(--frost-dim)]">
+                    <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-micro text-[var(--frost-dim)]">
                       Demo mode: no API key on this machine, so the photo was not actually
                       checked. Set ANTHROPIC_API_KEY to run real validation.
                     </p>
                   )}
 
                   {verdict.verified && !verdict.correctlySorted && (
-                    <p className="rounded-lg bg-[var(--night-3)] px-3 py-2 text-xs text-[var(--frost-dim)]">
+                    <p className="rounded-lg bg-[var(--night-3)] px-3 py-2 text-micro text-[var(--frost-dim)]">
                       Looks like the wrong stream — it belongs in {verdict.stream}.
                     </p>
                   )}
@@ -174,7 +178,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
           )}
         </div>
 
-        {error && <p className="text-xs text-[var(--coral)]">{error}</p>}
+        {error && <p className="text-micro text-[var(--coral)]">{error}</p>}
       </div>
 
       <div
@@ -186,14 +190,14 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             <>
               <Link
                 href="/"
-                className="press flex min-h-14 flex-1 items-center justify-center rounded-full btn-primary px-6 text-[0.95rem] font-medium  "
+                className="press flex min-h-14 flex-1 items-center justify-center rounded-full btn-primary px-6 text-body font-medium  "
               >
                 Back to Nanuq
               </Link>
               {!verdict.verified && (
                 <button
                   onClick={retry}
-                  className="press min-h-14 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/60 px-6 text-[0.95rem]"
+                  className="press min-h-14 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/60 px-6 text-body"
                 >
                   Retake
                 </button>
@@ -203,7 +207,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={phase === "checking"}
-              className="press flex min-h-14 w-full items-center justify-center rounded-full btn-primary px-6 text-[0.95rem] font-medium   disabled:opacity-60"
+              className="press flex min-h-14 w-full items-center justify-center rounded-full btn-primary px-6 text-body font-medium   disabled:opacity-60"
             >
               {phase === "checking" ? "Checking…" : "Take the photo"}
             </button>

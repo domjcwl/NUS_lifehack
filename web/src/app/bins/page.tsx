@@ -49,8 +49,8 @@ export default function Bins() {
   return (
     <div className="stagger space-y-5">
       <header>
-        <h1 className="text-[1.6rem]">Every bin in Singapore</h1>
-        <p className="mt-1.5 text-[0.95rem] text-[var(--frost-dim)]">
+        <h1 className="text-title">Every bin in Singapore</h1>
+        <p className="mt-1.5 text-body text-[var(--frost-dim)]">
           13,004 recycling and e-waste points, straight from NEA — including the blue bin at
           the foot of your block. The most common reason something recyclable goes in general
           waste is simply not knowing where the right bin is.
@@ -60,13 +60,13 @@ export default function Bins() {
       <BinMap onSelect={setSelected} kinds={kinds} onToggleKind={toggleKind} />
 
       {selected && (
-        <section className="card px-5 py-4">
+        <section className="card pad">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="mono text-[10px] text-[var(--aurora-2)]">{kindLabel(selected.kind)}</p>
+              <p className="mono text-label text-[var(--aurora-2)]">{kindLabel(selected.kind)}</p>
               <p className="mt-1 font-medium">{selected.name}</p>
               {selected.postal && (
-                <p className="mono mt-1 text-[10px] text-[var(--frost-dim)]">
+                <p className="mono mt-1 text-label text-[var(--frost-dim)]">
                   Singapore {selected.postal}
                 </p>
               )}
@@ -83,7 +83,7 @@ export default function Bins() {
             {selected.streams.map((s) => (
               <span
                 key={s}
-                className="rounded-full bg-[var(--night-3)] px-2.5 py-1 text-[10px] text-[var(--frost-dim)]"
+                className="rounded-full bg-[var(--night-3)] px-3 py-1 text-micro text-[var(--frost-dim)]"
               >
                 {s}
               </span>
@@ -93,7 +93,7 @@ export default function Bins() {
       )}
 
       <section>
-        <p className="mono text-[10px] text-[var(--frost-dim)]">{status}</p>
+        <p className="mono text-label text-[var(--frost-dim)]">{status}</p>
         {near === null ? (
           <div className="mt-3 space-y-2">
             {[0, 1, 2].map((i) => (
@@ -105,18 +105,18 @@ export default function Bins() {
             {near.map((b) => (
               <li
                 key={b.id}
-                className="card press flex items-start justify-between gap-4 px-5 py-4"
+                className="card press pad flex items-start justify-between gap-4"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium">{b.name}</p>
-                  <p className="mono mt-1 text-[10px] text-[var(--frost-dim)]">
+                  <p className="mono mt-1 text-label text-[var(--frost-dim)]">
                     {kindLabel(b.kind)}
                     {b.postal ? ` · ${b.postal}` : ""}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-lg font-semibold tabular-nums">{format(b.metres)}</p>
-                  <p className="mono text-[9px] text-[var(--frost-dim)]">away</p>
+                  <p className="text-sub font-semibold tabular-nums">{format(b.metres)}</p>
+                  <p className="mono text-label text-[var(--frost-dim)]">away</p>
                 </div>
               </li>
             ))}
