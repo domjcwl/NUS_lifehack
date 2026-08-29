@@ -96,6 +96,16 @@ authentication, and exactly how to add it back, is in
 | POST | `/recycle/{qr_code_id}/submit` | Submit photo proof, earn points |
 | GET | `/activities/{activity_id}` | One recycling activity |
 | GET | `/users/{user_id}/activities` | A user's recycling history |
+| POST | `/groups` | Create a group, creator joins automatically |
+| POST | `/groups/join` | Join with an invite code |
+| POST | `/groups/{group_id}/join` | Join by id |
+| POST | `/groups/{group_id}/leave` | Leave |
+| GET | `/groups/{group_id}` | Group with member count and totals |
+| GET | `/groups/{group_id}/members` | Members and what each contributed |
+| GET | `/groups/{group_id}/leaderboard` | Members ranked, ties share a rank |
+| GET | `/groups/{group_id}/activities` | Activity feed with ready-made text |
+| GET | `/users/{user_id}/groups` | A user's groups |
+| POST | `/chat` | Ask a recycling question (LangGraph + RAG) |
 | GET | `/health` | Liveness |
 
 No endpoint requires authentication — there is a test asserting that stays true.
@@ -112,6 +122,64 @@ curl "http://127.0.0.1:8000/recycle/sg-nus-eng-ew-01"
 
 Bins, QR submission, groups, pet, chatbot, leaderboard and news follow — see
 [`planning/01-implementation-plan.md`](planning/01-implementation-plan.md).
+
+## The chatbot
+
+`POST /chat` runs a **LangGraph** state machine, not a single model call:
+
+```
+classify -> retrieve -> generate -> ground check
+   |                                     ^
+   +--- out of scope --> redirect -------+
+```
+
+- **retrieve** is BM25 over a curated Singapore knowledge base, scored with a keyword
+  bonus weighted by keyword rarity. Pure Python, no vector store, no embedding call.
+- **generate** is the only node that touches the network. Claude when `ANTHROPIC_API_KEY`
+  works, a verbatim quote of the best-matching knowledge chunk when it does not.
+- **ground check** verifies the answer against what was retrieved and overrides claims the
+  knowledge base does not support - if a model ever says batteries go in the blue bin,
+  that answer does not ship.
+
+The point of the graph is that the two nodes preventing invented disposal advice run
+**identically with or without an API key**. Losing the key degrades the wording, never
+the correctness. Responses carry `used_model` and `grounded` so the UI can show which
+mode it is in.
+
+When nothing matches, it says so rather than guessing:
+
+```
+Q: How do I dispose of radioactive waste from my reactor?
+   grounded=false, sources=[]
+   "I don't have reliable information on that one..."
+```
+
+A failed model call latches off for the rest of the process, so a bad key costs one
+round trip rather than one per question (measured: 2058ms, then 5ms).
+
+**The knowledge base is hand-written from public NEA guidance and should be verified
+before judging.** It is not scraped from an authoritative feed.
+
+## Groups
+
+Points earned alone are a score; points earned for a group your friends can see are
+social pressure, which is the half of the loop the brief actually cares about.
+
+A group is joined by **invite code**, not by numeric id - `join with 7KPQ4M` works when
+read aloud across a table. Codes drop confusable characters (`0`/`O`, `1`/`I`/`L`, `S`)
+and ignore case and dashes on input.
+
+The feed composes its own sentence, so every client renders it identically:
+
+```
+Dominic recycled e-waste 🔌 +20 points
+Hari recycled ♻️ +10 points
+```
+
+Leaderboard ties **share a rank** - two members on 35 points are both third. Inventing
+an order between equal scores would be arbitrary and visibly unfair.
+
+Leaving a group does not rewrite its history: past activities and points stay attributed.
 
 ## Anti-abuse, and what it honestly is
 
@@ -155,5 +223,7 @@ Third-party components are recorded here as they are introduced, per the competi
 - **Pydantic**, **pydantic-settings** — validation and config (MIT)
 - **Pillow** — image handling for proof-photo hashing (MIT-CMU)
 - **httpx** — async HTTP client (BSD-3)
-- **LangGraph**, **LangChain**, **OpenAI Python SDK** — chatbot agent (MIT / Apache 2.0)
+- **LangGraph**, **LangChain** — the chatbot state graph (MIT)
+- **Anthropic Python SDK** / **langchain-anthropic** — Claude access (MIT)
+- **qrcode** — printable bin stickers (BSD)
 - **pytest** — tests (MIT)

@@ -20,10 +20,10 @@ python-dotenv>=1.2.3
 # Restoring it needs: PyJWT>=2.13.0 and bcrypt>=5.0.0
 
 # --- AI ---
-langgraph>=1.2.11
+langgraph>=1.2.11                 # the chatbot is a state graph, not one call
 langchain-core>=1.6.1
-langchain-openai>=1.6.0
-openai>=3.6.0
+langchain-anthropic>=1.7.0        # Claude binding for the generate node
+anthropic>=1.2.0
 
 # --- Media / integrations ---
 Pillow>=12.3.0                    # perceptual hashing, and drawing QR stickers

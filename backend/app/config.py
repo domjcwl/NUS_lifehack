@@ -34,10 +34,12 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "*"  # comma-separated, or "*"
 
     # --- External APIs (all optional - every one has a working fallback) ----
-    OPENAI_API_KEY: str = ""
-    OPENAI_MODEL: str = "gpt-4o-mini"
-    OPENAI_VISION_MODEL: str = "gpt-4o-mini"
-    MAPS_API_KEY: str = ""
+    # The chatbot uses Claude. The same variable the Next.js app reads, so one key
+    # serves the whole project. Absent, the chatbot answers from its knowledge base.
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-opus-5"
+    CHAT_MAX_TOKENS: int = 512
+    CHAT_TIMEOUT_SECONDS: float = 20.0
     NEWS_API_KEY: str = ""
 
     # --- QR codes ----------------------------------------------------------
@@ -61,6 +63,7 @@ class Settings(BaseSettings):
     PET_XP_PER_POINT: int = 1
     PET_HUNGER_PER_HOUR: float = 1.5  # hunger climbs 0 -> 100 in roughly 3 days
     PET_HEALTH_LOSS_PER_HOUR_STARVING: float = 2.0
+    MAX_GROUP_MEMBERS: int = 50
 
     # --- Anti-abuse --------------------------------------------------------
     SUBMISSION_COOLDOWN_MINUTES: int = 60  # per user, per bin
@@ -91,8 +94,8 @@ class Settings(BaseSettings):
         return self.MAX_UPLOAD_MB * 1024 * 1024
 
     @property
-    def openai_enabled(self) -> bool:
-        return bool(self.OPENAI_API_KEY.strip())
+    def anthropic_enabled(self) -> bool:
+        return bool(self.ANTHROPIC_API_KEY.strip())
 
 
 @lru_cache

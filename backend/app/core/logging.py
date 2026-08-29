@@ -29,8 +29,18 @@ def setup_logging() -> None:
     root.handlers = [handler]
     root.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
 
-    # SQLAlchemy is chatty at INFO and drowns out our own lines during a demo.
-    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    # These are chatty at DEBUG and drown out our own lines during a demo. The HTTP
+    # clients also log full request bodies, which is noise at best.
+    for noisy in (
+        "sqlalchemy.engine",
+        "anthropic",
+        "httpx",
+        "httpx2",
+        "httpcore",
+        "httpcore2",
+        "urllib3",
+    ):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
     _CONFIGURED = True
 
 

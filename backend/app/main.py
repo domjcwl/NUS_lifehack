@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.core.logging import get_logger, setup_logging
 from app.database import create_db_and_tables
-from app.routers import activities, bins, recycle, users
+from app.routers import activities, bins, chat, groups, recycle, users
 
 logger = get_logger(__name__)
 
@@ -35,8 +35,10 @@ async def lifespan(app: FastAPI):
     setup_logging()
     create_db_and_tables()
     logger.info("%s starting in %s mode", settings.APP_NAME, settings.ENV)
-    if not settings.openai_enabled:
-        logger.info("No OPENAI_API_KEY set. AI features will use their offline fallbacks.")
+    if not settings.anthropic_enabled:
+        logger.info(
+            "No ANTHROPIC_API_KEY set. The chatbot will answer from its knowledge base."
+        )
     yield
     logger.info("%s shutting down", settings.APP_NAME)
 
@@ -69,6 +71,8 @@ def create_app() -> FastAPI:
     app.include_router(bins.router, prefix=settings.API_PREFIX)
     app.include_router(recycle.router, prefix=settings.API_PREFIX)
     app.include_router(activities.router, prefix=settings.API_PREFIX)
+    app.include_router(groups.router, prefix=settings.API_PREFIX)
+    app.include_router(chat.router, prefix=settings.API_PREFIX)
 
     @app.exception_handler(RequestValidationError)
     async def validation_handler(request: Request, exc: RequestValidationError):
