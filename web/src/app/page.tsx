@@ -41,7 +41,7 @@ export default function Home() {
   if (!s) {
     return (
       <div className="space-y-4">
-        <div className="card h-64 animate-pulse opacity-60" />
+        <div className="card card-lg h-64 animate-pulse opacity-60" />
         <div className="card h-28 animate-pulse opacity-40" />
       </div>
     );
@@ -52,7 +52,7 @@ export default function Home() {
   return (
     <>
       <div className="stagger space-y-4">
-        <section className="card flex flex-col items-center px-5 pb-6 pt-5 text-center">
+        <section className="card card-lg flex flex-col items-center px-5 pb-6 pt-5 text-center">
           <Bear mood={s.mood} health={s.health} />
           <h1 className="mt-3 text-[1.65rem] font-semibold">{copy.title}</h1>
           <p className="mt-1 max-w-xs text-[0.95rem] text-[var(--ink-soft)]">{copy.line}</p>

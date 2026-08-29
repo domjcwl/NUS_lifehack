@@ -39,13 +39,19 @@ export default function Bear({ mood, health }: { mood: BearMood; health: number 
     <svg viewBox="0 0 300 210" className="w-full max-w-xs" role="img" aria-label={`Nanuq is ${mood}`}>
       <defs>
         <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#eaf2f6" />
-          <stop offset="100%" stopColor="#cfe0e9" />
+          <stop offset="0%" stopColor="#dcecf3" />
+          <stop offset="55%" stopColor="#e9f2f6" />
+          <stop offset="100%" stopColor="#f6efe2" />
         </linearGradient>
+        <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor="#f9e9c6" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#f9e9c6" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
       <rect width="300" height="210" rx="18" fill="url(#sky)" />
-      <circle cx="245" cy="45" r="17" fill="#f6e7c8" opacity="0.85" />
+      <circle cx="245" cy="48" r="46" fill="url(#sun)" />
+      <circle cx="245" cy="48" r="15" fill="#f7e3ba" opacity="0.9" />
 
       <motion.path
         d="M0 158 Q75 148 150 158 T300 158 V210 H0 Z"

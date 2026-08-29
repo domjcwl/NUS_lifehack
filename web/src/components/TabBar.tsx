@@ -18,7 +18,7 @@ export default function TabBar() {
 
   return (
     <nav
-      className="chrome fixed inset-x-0 bottom-0 z-30 border-t border-[var(--edge)]"
+      className="chrome-dark fixed inset-x-0 bottom-0 z-30"
       style={{ paddingBottom: "var(--safe-b)" }}
       aria-label="Primary"
     >
@@ -32,13 +32,25 @@ export default function TabBar() {
                 href={t.href}
                 aria-current={active ? "page" : undefined}
                 /* min-h-14 keeps every target well past the 44px floor. */
+                /* Vibrancy: over a translucent dark material, muted grey text
+                   goes illegible — lift contrast and weight instead. */
                 className={clsx(
-                  "press flex min-h-14 flex-col items-center justify-center gap-1 py-2",
-                  active ? "text-[var(--deep)]" : "text-[var(--ink-soft)]",
+                  "press relative flex min-h-14 flex-col items-center justify-center gap-1 py-2",
+                  active ? "text-white" : "text-white/70",
                 )}
               >
                 <Icon filled={active} />
-                <span className="text-[10px] font-medium tracking-tight">{t.label}</span>
+                <span
+                  className={clsx(
+                    "text-[10px] tracking-tight",
+                    active ? "font-semibold" : "font-medium",
+                  )}
+                >
+                  {t.label}
+                </span>
+                {active && (
+                  <span className="absolute inset-x-5 top-0 h-px bg-[var(--glacier)]" />
+                )}
               </Link>
             </li>
           );

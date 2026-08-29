@@ -1,21 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --ice-0: #f2f5f7;
-  --ice-1: #e3eaef;
-  --ink: #10202b;
+  /* Surface — a pale tinted wash, never a flat fill. */
+  --ice-0: #f4f8fa;
+  --ice-1: #e4eef3;
+  --ice-2: #d3e3ea;
+
+  /* Structural chrome — deep and heavy, so it separates rather than floats. */
+  --abyss: #0a2531;
+  --abyss-soft: rgba(10, 37, 49, 0.82);
+
+  --ink: #0e1f29;
   --ink-soft: #4a6072;
   --deep: #0d3b52;
   --sea: #1d7a99;
+  --glacier: #6bb6cf;
   --coral: #e0603c;
   --gold: #d99b2b;
-  --edge: rgba(16, 32, 43, 0.1);
+  --edge: rgba(14, 31, 41, 0.09);
+  --edge-bright: rgba(255, 255, 255, 0.5);
 
   /* Built-in CSS easings are too weak to read as intentional. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
-  /* Chrome heights, so content can scroll under translucent layers. */
   --tabbar-h: 4.25rem;
   --safe-b: env(safe-area-inset-bottom, 0px);
 }
@@ -23,10 +31,13 @@
 @theme inline {
   --color-ice-0: var(--ice-0);
   --color-ice-1: var(--ice-1);
+  --color-ice-2: var(--ice-2);
+  --color-abyss: var(--abyss);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-deep: var(--deep);
   --color-sea: var(--sea);
+  --color-glacier: var(--glacier);
   --color-coral: var(--coral);
   --color-gold: var(--gold);
   --font-sans: var(--font-geist-sans);
@@ -34,36 +45,60 @@
 }
 
 html {
-  /* Stop iOS inflating text in landscape and breaking the layout. */
   -webkit-text-size-adjust: 100%;
+  background: var(--ice-1);
 }
 
+/*
+ * Layered radial glows rather than a single gradient. Depth comes from
+ * overlapping soft light, the way it does in the reference — a flat fill
+ * reads as a document, not a place.
+ */
 body {
   background:
-    radial-gradient(120% 80% at 50% -10%, #ffffff 0%, var(--ice-0) 45%, var(--ice-1) 100%);
+    radial-gradient(70% 45% at 78% 4%, rgba(107, 182, 207, 0.28) 0%, transparent 62%),
+    radial-gradient(60% 40% at 12% 22%, rgba(255, 255, 255, 0.85) 0%, transparent 58%),
+    radial-gradient(90% 55% at 50% 100%, rgba(29, 122, 153, 0.16) 0%, transparent 70%),
+    linear-gradient(180deg, var(--ice-0) 0%, var(--ice-1) 55%, var(--ice-2) 100%);
   background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   line-height: 1.5;
-  /* No pull-to-refresh fighting a drag gesture. */
   overscroll-behavior-y: none;
 }
 
 /* Tracking is size-specific — large text reads too loose without negative tracking. */
-h1 { letter-spacing: -0.022em; line-height: 1.12; }
-h2 { letter-spacing: -0.015em; line-height: 1.2; }
+h1 { letter-spacing: -0.024em; line-height: 1.1; }
+h2 { letter-spacing: -0.016em; line-height: 1.2; }
 
+/*
+ * Light material: draws attention to interactive content. Generous radius and
+ * a bright top edge, so it reads as light catching a real surface.
+ */
 .card {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid var(--edge);
-  border-radius: 1.25rem;
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--edge-bright);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 8px 24px -12px rgba(14, 31, 41, 0.18);
 }
 
-/* Translucent chrome — content scrolls underneath rather than being boxed out. */
-.chrome {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(20px) saturate(180%);
+/* Bigger surfaces read as thicker — stronger blur, deeper shadow. */
+.card-lg {
+  border-radius: 1.75rem;
+  backdrop-filter: blur(24px) saturate(160%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 18px 44px -20px rgba(14, 31, 41, 0.3);
+}
+
+/* Dark material: separates structural regions. Never stacked on light glass. */
+.chrome-dark {
+  background: var(--abyss-soft);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .mono {
@@ -77,7 +112,8 @@ h2 { letter-spacing: -0.015em; line-height: 1.2; }
  * foundation — waiting for the click to acknowledge a press feels dead.
  */
 .press {
-  transition: transform 130ms var(--ease-out), background-color 130ms var(--ease-out);
+  transition: transform 130ms var(--ease-out), background-color 130ms var(--ease-out),
+    opacity 130ms var(--ease-out);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -88,7 +124,7 @@ h2 { letter-spacing: -0.015em; line-height: 1.2; }
 /* Touch devices fire hover on tap, so gate hover states out of their way. */
 @media (hover: hover) and (pointer: fine) {
   .hoverable:hover {
-    background-color: var(--ice-1);
+    background-color: rgba(255, 255, 255, 0.9);
   }
 }
 
@@ -119,7 +155,7 @@ h2 { letter-spacing: -0.015em; line-height: 1.2; }
 @media (prefers-reduced-motion: reduce) {
   .bob { animation: none; }
   .rise, .stagger > * { animation: none; opacity: 1; transform: none; }
-  .press:active { transform: none; background-color: var(--ice-1); }
+  .press:active { transform: none; opacity: 0.7; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
@@ -127,11 +163,13 @@ h2 { letter-spacing: -0.015em; line-height: 1.2; }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .card { background: #ffffff; backdrop-filter: none; }
-  .chrome { background: #ffffff; backdrop-filter: none; }
+  .card, .card-lg { background: #ffffff; backdrop-filter: none; }
+  .chrome-dark { background: var(--abyss); backdrop-filter: none; }
+  body { background: var(--ice-0); }
 }
 
 @media (prefers-contrast: more) {
-  :root { --edge: rgba(16, 32, 43, 0.4); --ink-soft: #2b3f4f; }
-  .card, .chrome { background: #ffffff; backdrop-filter: none; }
+  :root { --edge: rgba(14, 31, 41, 0.4); --ink-soft: #2b3f4f; }
+  .card, .card-lg { background: #ffffff; backdrop-filter: none; border-color: var(--edge); }
+  .chrome-dark { background: var(--abyss); backdrop-filter: none; }
 }
