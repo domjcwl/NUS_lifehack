@@ -1,0 +1,34 @@
+# Verified working on Python 3.14.6 (Windows) on 29 Aug 2026.
+# Pinned to lower bounds that are known-good rather than exact pins, so a teammate on
+# 3.11 or 3.12 also resolves cleanly.
+
+# --- Web framework ---
+fastapi>=0.141.1
+uvicorn[standard]>=0.52.4
+python-multipart>=0.0.32          # multipart/form-data, required for photo upload
+
+# --- Data ---
+sqlmodel>=0.0.42                  # SQLAlchemy 2.x + Pydantic in one model class
+SQLAlchemy>=2.0.52
+pydantic>=2.13.5
+pydantic-settings>=2.15.0
+email-validator>=2.3.0            # backs pydantic's EmailStr
+python-dotenv>=1.2.3
+
+# --- Auth ---
+# None. Authentication is deliberately disabled (planning/02-auth-decision.md).
+# Restoring it needs: PyJWT>=2.13.0 and bcrypt>=5.0.0
+
+# --- AI ---
+langgraph>=1.2.11
+langchain-core>=1.6.1
+langchain-openai>=1.6.0
+openai>=3.6.0
+
+# --- Media / integrations ---
+Pillow>=12.3.0                    # perceptual hashing, and drawing QR stickers
+qrcode[pil]>=8.2                  # printable QR stickers for the bins
+httpx>=0.28.1                     # async client for maps and news APIs
+
+# --- Tests ---
+pytest>=9.1.1

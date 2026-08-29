@@ -1,0 +1,6 @@
+qr_codes/
+.env.example
+.env
+venv/
+hackathon_information/
+planning/
