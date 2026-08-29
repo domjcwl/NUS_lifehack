@@ -55,3 +55,25 @@ RISKIEST ASSUMPTION: … → test by <time>
 OWNERS: dom=… inferno=… zereth=… hari=…
 STACK: …
 ```
+
+### Sat 13:45 — No authentication in the backend
+Dropped JWT, login and password hashing. Callers identify themselves with `?user_id=` or an
+`X-User-Id` header.
+**Why:** the ceremony was friction with no payoff for a two-day build. Trigger was a real
+symptom — Swagger pre-filled the register example, so the pre-filled body only ever worked
+once and looked like a broken endpoint. Trade-off was stated (anyone can act as anyone, so
+"one submission per user per bin" is forgeable) and accepted: verification here is a game
+mechanic, not a security control.
+**Contained in:** `backend/app/core/deps.py` only — every router depends on `CurrentUser`
+and not on how identity was established.
+**Revisit if:** a judge asks about account integrity, or the frontend needs real sessions.
+Restoring it is one file — steps in `backend/planning/02-auth-decision.md`.
+
+### Sat 14:25 — Rejected submissions do not consume the per-bin cooldown
+Cooldown and duplicate-photo checks now count only `approved` activities.
+**Why:** found in live testing. A blurry or blank photo was rejected (0 points) but still
+started the 60-minute cooldown, locking the user out of a bin they had physically walked
+to. The cooldown exists to stop farming points from one bin; a submission that earns
+nothing should not consume it. Same reasoning for duplicate detection — resubmitting a
+better photo of the same scene is retrying, not farming.
+**Revisit if:** someone finds a way to farm by deliberately triggering rejections.
