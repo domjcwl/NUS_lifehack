@@ -153,3 +153,63 @@ real person on a phone* — a web app opened from a QR code needs no install.
 
 ## Owners
 > Fill in: dom = · inferno = · zereth = · hari =
+
+### Sat 14:55 — Groups are joined by invite code, and leaderboard ties share a rank
+Invite codes are 6 characters from an alphabet with no confusable pairs (`0`/`O`,
+`1`/`I`/`L`, `S` removed); input is case- and dash-insensitive.
+**Why:** the second person joining is the moment the social mechanic starts working. A
+code that can be read aloud across a table removes the friction; a numeric id does not.
+Ties share a rank because inventing an order between equal scores is arbitrary and the
+person who loses the coin flip can see it.
+**Also:** leaving a group does not delete past activities or point transactions —
+a group's totals are its record, and rewriting them on exit would corrupt the
+measurement story the pitch depends on.
+
+### Sat 14:50 — NOTE: two backends now exist in this repo
+`backend/` (FastAPI, this workstream) and `web/` (Next.js API routes + `web/data/floe.db`,
+covering auth, bins, chat, validate, friends, log, plus `lib/bear.ts` and `lib/impact.ts`).
+**Why this matters:** they implement the same product. Judging is a two-minute walk-up and
+the repo rule is "one narrow path that works end to end". A decision on which backend the
+demo runs against should be made well before Sunday 09:00, not discovered at the table.
+**Not yet decided.** Raised by Claude 29 Aug ~14:50.
+
+### Sat 15:00 — Split settled: web/ owns bins, verification, measurement, identity
+`backend/` keeps the chatbot (LangGraph, as Dom asked), plus points, groups and the pet.
+**Why:** `web/` already had 13,006 real NEA bins from data.gov.sg, Claude vision photo
+verification, a baseline/arms/D30 impact model, and guest-first sessions. Rebuilding any
+of it in `backend/` would be duplicated work that scores nothing.
+**Cancelled in backend:** Step 8 (impact metrics), Step 9 (vision verification).
+**Still unreconciled:** web uses TEXT uuid user ids, backend uses INT; web models social
+as friendships, backend as groups with a shared pet. One of those mechanics has to go.
+Detail in `backend/planning/03-architecture-split.md`.
+
+### Sat 15:05 — Chatbot uses Claude, not OpenAI
+**Why:** no OpenAI key exists in the project; `web/` already uses `@anthropic-ai/sdk`.
+One `ANTHROPIC_API_KEY` now serves both codebases. Removed `langchain-openai` and `openai`.
+
+### Sat 15:10 — WARNING: no working API key in the project
+`ANTHROPIC_API_KEY` is set in the shell but returns **401** from the API, and there is no
+`web/.env` — only `.env.example`. Right now `web/api/validate` returns `stubbed: true`,
+`web/api/chat` serves its fallback, and `backend/chat` answers from its knowledge base.
+**Action needed before judging:** put a real key in `web/.env` and `backend/.env`, or
+decide deliberately to present the demo as offline. Every path degrades honestly and
+reports which mode it is in, so offline is defensible — but it should be a choice.
+
+### Sat 15:30 — backend/ narrowed to the chatbot; everything else deleted
+`web/` now owns identity, bins, verification, measurement, social, pet, submission and
+leaderboard. `backend/` is the LangGraph recycling chatbot and nothing else: `POST /chat`,
+`/health`, `/`.
+**Why:** two implementations of the same product was the failure mode our own repo rules
+warn about, and `web/` was ahead on every one of those concerns (13,004 real NEA bins,
+Claude vision verification, a baseline/arms/D30 impact model, guest-first sessions, and a
+UI). Dead code left lying around gets wired up by mistake at 3am.
+**Deleted:** all 8 SQLModel tables, the database layer, users/bins/recycle/activities/
+groups routers, points ledger, heuristic verifier, storage abstraction, QR sticker
+generator, seed and reset scripts, and 117 of the 150 tests.
+**Recoverable:** everything is in commit `1981459` — `git show 1981459:backend/<path>`.
+Committed deliberately before deleting so nothing was lost irreversibly.
+**Consequence:** the service is now stateless — no DB, no migrations, no seeding. Test
+suite went from 24s to 0.06s. Dependencies dropped from 18 to 11.
+**QR sticker generator dropped for good** (Dom, 15:45): not ported to web's scan URLs.
+Nothing in the repo now produces a printable QR. The underlying conflict is still open —
+web's `/scan/{id}` consumes a single-use instance, so a sticker glued to a bin works once.
