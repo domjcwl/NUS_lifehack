@@ -14,6 +14,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { answerAt, answerNearest, placeFrom } from "@/lib/places";
 import OpenAI from "openai";
 
 import {
@@ -53,13 +54,54 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No messages." }, { status: 400 });
   }
 
+  let reply: ChatReply;
   try {
-    return NextResponse.json(await ask(messages, location));
+    reply = await ask(messages, location);
   } catch (err) {
     if (!(err instanceof ChatbotUnavailable)) throw err;
     console.warn(`[chat] falling back — knowledge service unavailable: ${err.message}`);
-    return NextResponse.json(await degraded(messages));
+    reply = await degraded(messages);
   }
+
+  /*
+   * "Where is the nearest bin to X" is answerable here and nowhere else: this
+   * process holds all 12,902 bins, and the knowledge service ships a gazetteer
+   * of exactly one place, so it answers everything else with "use the map".
+   * Telling someone holding a bottle to go look at a map is not an answer when
+   * the real one is a name and a distance.
+   *
+   * Applied whether or not the service is up, and only when it has not already
+   * resolved somewhere itself.
+   */
+  const asked = messages[messages.length - 1]?.content ?? "";
+  const wantsPlace = reply.intent === "location" || reply.needs_location;
+  if (wantsPlace) {
+    /* The service resolves some places itself but answers in prose that never
+       names a bin. Whoever resolved the spot, the reply is rebuilt from this
+       app's own 12,902-bin dataset so the answer is a name and a distance. */
+    const known = reply.resolved_location;
+    const found = known
+      ? answerAt({ name: known.name, lat: known.latitude, lng: known.longitude })
+      : await (async () => {
+          const place = placeFrom(asked);
+          return place ? answerNearest(place) : null;
+        })();
+    {
+      if (found) {
+        reply = {
+          ...reply,
+          answer: found.answer,
+          intent: "location",
+          needs_location: false,
+          resolved_location: found.resolved,
+          locations: found.locations as ChatReply["locations"],
+          notes: [...(reply.notes ?? []), "Bins from the NEA dataset in this app."],
+        };
+      }
+    }
+  }
+
+  return NextResponse.json(reply);
 }
 
 /**
