@@ -175,8 +175,14 @@ guest-first rather than login-first.
   aloud and typed by someone else.
 - Every member keeps **their own bear** — the group is where you see whose ice is
   holding, not a shared pet. Loss aversion stays personal.
+- The group page is a **leaderboard**, ranked on points. Ties share a rank — two
+  people on 240 points are both 2nd and the next is 4th, because inventing an
+  order between equal scores is arbitrary and the loser of the coin flip can see
+  it.
 - A member row carries their **live bear state** (streak, mood, floe health,
-  level). You cannot see their bins, their location, or what they threw away.
+  level) beside their score. The number says who is ahead; the animal says how
+  they are actually doing, which is the thing the app is about. You cannot see
+  their bins, their location, or what they threw away.
 - Guests can use everything except groups, and are prompted to claim a username
   at the point they try.
 

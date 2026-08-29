@@ -340,3 +340,19 @@ Zoom 17, not the maximum: close enough that the bin is unambiguous, far enough t
 it stands on is still readable, which is what someone about to walk there needs. `flyTo` becomes
 an instant `setView` under reduced motion, and the scroll follows the same preference. The rows
 are real buttons now, so they work from a keyboard and announce themselves.
+
+## The group page became a leaderboard (Sat 29 Aug, ~21:30)
+
+Ranked on points, because points are what a scan produces: 10 for a verified action, 5 more for
+the right stream, 25 every seventh day. The rule is stated in one line above the board — a score
+whose origin is unexplained reads as arbitrary.
+
+**Ties share a rank.** Two people on 240 points are both 2nd and the next is 4th. Inventing an
+order between equal scores is arbitrary, and the person who lost the coin flip can see that it
+was one. Sort falls through points → streak → name, so the list never reshuffles between renders.
+
+**The bear stays on every row**, next to the score. This is the tension worth naming: the app's
+thesis is that points are not the reward, the bear is — and a leaderboard pulls the other way.
+Keeping the animal in the row is how both survive. The number says who is ahead; the bear says
+how they are actually doing, including when someone at the top of the board has a floe that is
+melting.
