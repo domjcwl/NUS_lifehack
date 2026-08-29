@@ -66,7 +66,7 @@ export default function LearnPrototypes() {
 
   return (
     <>
-      {/* Picker chrome is verbatim from the skill spec — never themed. */}
+      {/* Picker chrome: the skill spec, minus its shadow stack. See PICKER_CSS. */}
       <style>{PICKER_CSS}</style>
 
       {/* Realistic surrounding context: same width and chrome as the real page. */}
@@ -105,6 +105,9 @@ export default function LearnPrototypes() {
   );
 }
 
+/* Deviates from the prototype skill's verbatim picker spec: the shadow stack
+   is replaced with a border, at the user's explicit request for a shadow-free
+   UI. Everything else about the picker is unchanged. */
 const PICKER_CSS = `
 .proto-picker {
   position: fixed;
@@ -120,10 +123,7 @@ const PICKER_CSS = `
   background: rgba(10, 10, 10, 0.82);
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
   backdrop-filter: blur(12px) saturate(1.4);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 8px 24px rgba(0, 0, 0, 0.24),
-    0 2px 6px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
   line-height: 1;
