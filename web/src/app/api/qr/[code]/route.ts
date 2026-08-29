@@ -5,7 +5,7 @@ import { qrSvg, scanUrlFor } from "@/lib/qr";
 /**
  * The QR for one bin, as SVG.
  *
- * Rendered on demand rather than pre-generated as 13,004 files: the code is a
+ * Rendered on demand rather than pre-generated as 12,902 files: the code is a
  * pure function of the bin's location, so the image is too, and there is
  * nothing worth storing. SVG because these get printed at whatever size the
  * paper allows.

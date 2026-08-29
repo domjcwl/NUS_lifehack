@@ -65,7 +65,7 @@ export default function Bins() {
       <header>
         <h1 className="text-title">Every bin in Singapore</h1>
         <p className="mt-1.5 text-body text-[var(--frost-dim)]">
-          13,004 recycling and e-waste points, straight from NEA — including the blue bin at
+          12,902 recycling and e-waste points, straight from NEA — including the blue bin at
           the foot of your block. The most common reason something recyclable goes in general
           waste is simply not knowing where the right bin is.
         </p>

@@ -120,7 +120,7 @@ a photo was checked when it wasn't.
    Tampines Street 81
    is a real blue-bin location from the NEA dataset.
 3. Take or upload a photo. It is validated, then logged, and the streak advances.
-4. Open `/bins` for the island-wide map — 13,004 real NEA points, drawn individually.
+4. Open `/bins` for the island-wide map — 12,902 real NEA points, drawn individually.
 5. Open `/impact` for the measurement story.
 
 ### Why HDB residents, and not students
@@ -134,7 +134,7 @@ lives. E-waste points *do* cover campus, which is a natural second phase.
 
 ## The QR on the bin
 
-Every one of the 13,004 bins has its own code and its own QR, generated on demand at
+Every one of the 12,902 bins has its own code and its own QR, generated on demand at
 `/api/qr/<code>` and printable from `/bins/<code>/qr`. Scanning opens `/scan/<code>`, which
 is that bin's page: the photo gets logged against that block rather than against nothing.
 
@@ -142,8 +142,8 @@ is that bin's page: the photo gets logged against that block rather than against
 the dataset.** A sticker is printed once and then outlives the data behind it — `bins.json`
 gets rebuilt from NEA's feed, and if the code were an array index, a single insertion upstream
 would silently repoint every sticker in Singapore at the wrong bin. Verified collision-free
-across all 13,004: 102 codes repeat, and every one of those is the same physical location
-listed twice by NEA.
+across all 12,902: NEA's feed lists 13,004 rows, but 102 are the same physical spot entered
+twice — those collapse to one bin each, so one place never gets two stickers.
 
 Codes avoid `0`/`O` and `1`/`I`/`L`, like the group invite codes, because a peeled sticker
 gets read aloud and typed.

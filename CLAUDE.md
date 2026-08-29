@@ -67,7 +67,4 @@ Practical rules:
 
 ## Stack
 
-**Not yet chosen** — deliberately deferred until the briefs are known. See
-`.claude/skills/hack-scaffold/SKILL.md` for the verified setup commands once it is picked.
-
 Constraint: **Docker is not installed** on Hari's machine. Avoid stacks that need it.
