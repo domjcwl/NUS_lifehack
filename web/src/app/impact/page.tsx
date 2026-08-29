@@ -7,7 +7,7 @@ export default function Impact() {
   const peak = Math.max(...WEEKLY.map((w) => w.bear));
 
   return (
-    <div className="space-y-6 rise">
+    <div className="stagger space-y-5">
       <header>
         <p className="mono text-[10px] text-[var(--ink-soft)]">How we would know it worked</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Impact</h1>

@@ -49,9 +49,9 @@ export default function Bins() {
         </p>
       </header>
 
-      <ul className="space-y-3">
+      <ul className="stagger space-y-3">
         {list.map((b) => (
-          <li key={b.id} className="card flex items-start justify-between gap-4 px-5 py-4">
+          <li key={b.id} className="card press flex items-start justify-between gap-4 px-5 py-4">
             <div>
               <p className="font-medium">{b.name}</p>
               <p className="mono mt-1 text-[10px] text-[var(--ink-soft)]">{b.block}</p>

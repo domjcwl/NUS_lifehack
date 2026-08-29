@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
 import { use, useRef, useState } from "react";
 
 type Verdict = {
@@ -17,6 +18,7 @@ type Phase = "capture" | "checking" | "done";
 
 export default function Scan({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const reduce = useReducedMotion();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("capture");
@@ -78,85 +80,118 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="space-y-5 rise">
-      <div>
-        <p className="mono text-[10px] text-[var(--ink-soft)]">Scan {id}</p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight">COM3 Level 1 Foyer</h1>
-        <p className="mt-1 text-sm text-[var(--ink-soft)]">
-          Hold the item at the bin and take one photo. This slot works once.
-        </p>
-      </div>
+    <>
+      <div className="stagger space-y-4">
+        <div>
+          <Link href="/" className="mono press inline-block text-[10px] text-[var(--ink-soft)]">
+            ← Nanuq
+          </Link>
+          <h1 className="mt-2 text-[1.55rem] font-semibold">COM3 Level 1 Foyer</h1>
+          <p className="mt-1 text-[0.95rem] text-[var(--ink-soft)]">
+            Hold the item at the bin and take one photo. This slot works once.
+          </p>
+        </div>
 
-      <div className="card overflow-hidden">
-        {preview ? (
-          <img src={preview} alt="Your photo" className="aspect-[4/3] w-full object-cover" />
-        ) : (
-          <div className="flex aspect-[4/3] items-center justify-center bg-[var(--ice-1)]">
-            <p className="mono text-[10px] text-[var(--ink-soft)]">No photo yet</p>
-          </div>
-        )}
-
-        <div className="px-5 py-5">
-          {phase === "checking" && (
-            <p className="mono text-xs text-[var(--sea)]">Checking the photo…</p>
-          )}
-
-          {phase === "done" && verdict && (
-            <div className="space-y-3">
-              <p
-                className={`mono text-[10px] ${
-                  verdict.verified ? "text-[var(--sea)]" : "text-[var(--coral)]"
-                }`}
-              >
-                {verdict.verified ? "Verified" : "Not counted"}
-              </p>
-              <p className="text-sm">{verdict.reason}</p>
-              {verdict.stubbed && (
-                <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-[11px] text-[var(--ink-soft)]">
-                  Demo mode: no API key on this machine, so the photo was not actually
-                  checked. Set ANTHROPIC_API_KEY to run real validation.
-                </p>
-              )}
-              {verdict.verified && (
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-semibold text-[var(--coral)]">{streak}</span>
-                  <span className="mono text-[10px] text-[var(--ink-soft)]">day streak</span>
-                </div>
-              )}
-              {!verdict.correctlySorted && verdict.verified && (
-                <p className="rounded-lg bg-[var(--ice-1)] px-3 py-2 text-xs text-[var(--ink-soft)]">
-                  Looks like the wrong stream — it belongs in {verdict.stream}.
-                </p>
-              )}
-              <div className="flex gap-2 pt-1">
-                <Link
-                  href="/"
-                  className="flex-1 rounded-full bg-[var(--deep)] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-[var(--sea)]"
-                >
-                  Back to Nanuq
-                </Link>
-                {!verdict.verified && (
-                  <button
-                    onClick={retry}
-                    className="rounded-full border border-[var(--edge)] px-4 py-2.5 text-sm"
-                  >
-                    Retake
-                  </button>
-                )}
-              </div>
+        <div className="card overflow-hidden">
+          {preview ? (
+            <img src={preview} alt="Your photo" className="aspect-[4/3] w-full object-cover" />
+          ) : (
+            <div className="flex aspect-[4/3] items-center justify-center bg-[var(--ice-1)]">
+              <p className="mono text-[10px] text-[var(--ink-soft)]">No photo yet</p>
             </div>
           )}
 
-          {phase === "capture" && (
+          {(phase === "checking" || phase === "done") && (
+            <div className="px-5 py-5">
+              {phase === "checking" && (
+                <div className="flex items-center gap-2.5">
+                  <span className="size-2 animate-pulse rounded-full bg-[var(--sea)]" />
+                  <p className="mono text-[11px] text-[var(--sea)]">Checking the photo…</p>
+                </div>
+              )}
+
+              {phase === "done" && verdict && (
+                <motion.div
+                  /* Never from scale(0) — nothing appears from nothing. */
+                  initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.45 }}
+                  className="space-y-3"
+                >
+                  <p
+                    className={`mono text-[11px] ${
+                      verdict.verified ? "text-[var(--sea)]" : "text-[var(--coral)]"
+                    }`}
+                  >
+                    {verdict.verified ? "Verified" : "Not counted"}
+                  </p>
+                  <p className="text-[0.95rem]">{verdict.reason}</p>
+
+                  {verdict.verified && streak !== null && (
+                    <div className="flex items-baseline gap-2">
+                      <motion.span
+                        initial={reduce ? false : { scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", bounce: 0.35, duration: 0.5, delay: 0.12 }}
+                        className="text-4xl font-semibold tabular-nums text-[var(--coral)]"
+                      >
+                        {streak}
+                      </motion.span>
+                      <span className="mono text-[10px] text-[var(--ink-soft)]">day streak</span>
+                    </div>
+                  )}
+
+                  {verdict.stubbed && (
+                    <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-[11px] text-[var(--ink-soft)]">
+                      Demo mode: no API key on this machine, so the photo was not actually
+                      checked. Set ANTHROPIC_API_KEY to run real validation.
+                    </p>
+                  )}
+
+                  {verdict.verified && !verdict.correctlySorted && (
+                    <p className="rounded-lg bg-[var(--ice-1)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                      Looks like the wrong stream — it belongs in {verdict.stream}.
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {error && <p className="text-xs text-[var(--coral)]">{error}</p>}
+      </div>
+
+      <div
+        className="fixed inset-x-0 z-20 px-4"
+        style={{ bottom: "calc(var(--tabbar-h) + var(--safe-b) + 0.75rem)" }}
+      >
+        <div className="mx-auto flex max-w-lg gap-2.5">
+          {phase === "done" && verdict ? (
             <>
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="w-full rounded-full bg-[var(--deep)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--sea)]"
+              <Link
+                href="/"
+                className="press flex min-h-14 flex-1 items-center justify-center rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25"
               >
-                Take the photo
-              </button>
-              {error && <p className="mt-3 text-xs text-[var(--coral)]">{error}</p>}
+                Back to Nanuq
+              </Link>
+              {!verdict.verified && (
+                <button
+                  onClick={retry}
+                  className="press min-h-14 rounded-full border border-[var(--edge)] bg-white/80 px-6 text-[0.95rem]"
+                >
+                  Retake
+                </button>
+              )}
             </>
+          ) : (
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={phase === "checking"}
+              className="press flex min-h-14 w-full items-center justify-center rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25 disabled:opacity-60"
+            >
+              {phase === "checking" ? "Checking…" : "Take the photo"}
+            </button>
           )}
         </div>
       </div>
@@ -169,6 +204,6 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
         onChange={onPick}
         className="hidden"
       />
-    </div>
+    </>
   );
 }

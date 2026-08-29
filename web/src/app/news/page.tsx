@@ -41,7 +41,7 @@ export default function News() {
         </p>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="stagger space-y-3">
         {ITEMS.map((it) => (
           <li key={it.title} className="card px-5 py-4">
             <p className="mono text-[10px] text-[var(--sea)]">{it.tag}</p>

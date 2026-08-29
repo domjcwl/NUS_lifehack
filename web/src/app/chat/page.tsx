@@ -36,7 +36,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex min-h-[70vh] flex-col gap-4 rise">
+    <div className="flex flex-col gap-4 rise pb-20">
       <header>
         <p className="mono text-[10px] text-[var(--ink-soft)]">At the point of decision</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Which bin?</h1>
@@ -52,7 +52,7 @@ export default function Chat() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="rounded-full border border-[var(--edge)] bg-white/60 px-3 py-1.5 text-xs transition hover:bg-white"
+                className="press hoverable min-h-11 rounded-full border border-[var(--edge)] bg-white/60 px-4 text-[0.85rem]"
               >
                 {s}
               </button>
@@ -79,18 +79,20 @@ export default function Chat() {
           e.preventDefault();
           send(input);
         }}
-        className="sticky bottom-4 flex gap-2"
+        className="fixed inset-x-0 z-20 mx-auto flex max-w-lg gap-2 px-4"
+        style={{ bottom: "calc(var(--tabbar-h) + var(--safe-b) + 0.75rem)" }}
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about an item…"
-          className="flex-1 rounded-full border border-[var(--edge)] bg-white/80 px-4 py-3 text-sm outline-none focus:border-[var(--sea)]"
+          /* 16px minimum stops iOS zooming the viewport on focus. */
+          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-white/90 px-5 text-base outline-none backdrop-blur transition-colors focus:border-[var(--sea)]"
         />
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[var(--deep)] px-5 text-sm font-medium text-white disabled:opacity-40"
+          className="press min-h-14 shrink-0 rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25 disabled:opacity-40"
         >
           Ask
         </button>

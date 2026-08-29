@@ -124,6 +124,10 @@ dropped database connection. It is a single module to swap.
 
 - **Next.js 16**, **React 19**, **Tailwind CSS 4** — application framework and styling,
   scaffolded with `create-next-app` during the event.
+- **motion** (Framer Motion) — spring animations; **clsx** — conditional class names.
+- **Design guidance** from [emilkowalski/skills](https://github.com/emilkowalski/skills) (MIT) —
+  `emil-design-eng` and `apple-design` informed the motion, easing and mobile interaction
+  decisions. Guidance only; none of that repo's code ships here.
 - **Anthropic Claude API** (`@anthropic-ai/sdk`, `claude-opus-5`) — photo verification and
   the recycling assistant.
 - Campus bin locations are **representative sample data**, not an official NEA or NUS
