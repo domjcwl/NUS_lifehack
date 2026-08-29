@@ -129,13 +129,13 @@ export default function Bear({ mood, health }: { mood: BearMood; health: number 
         <g>
           <motion.path
             d="M0 158 Q75 148 150 158 T300 158 V210 H0 Z"
-            animate={{ fill: WATER[mood] }}
+            animate={{ fill: SEA[mood] }}
             transition={{ duration: reduce ? 0 : 0.45 }}
             opacity={0.9}
           />
           <motion.path
             d="M0 170 Q75 162 150 172 T300 168 V210 H0 Z"
-            animate={{ fill: WATER[mood] }}
+            animate={{ fill: SEA[mood] }}
             transition={{ duration: reduce ? 0 : 0.45 }}
             opacity={0.55}
           />
@@ -172,12 +172,12 @@ export default function Bear({ mood, health }: { mood: BearMood; health: number 
         >
           {mood === "fading" && (
             <>
-              <ellipse cx="52" cy="176" rx="17" ry="5" fill={TINT[mood]} opacity="0.7" />
-              <ellipse cx="256" cy="184" rx="12" ry="4" fill={TINT[mood]} opacity="0.6" />
+              <ellipse cx="52" cy="176" rx="17" ry="5" fill={FUR[mood]} opacity="0.7" />
+              <ellipse cx="256" cy="184" rx="12" ry="4" fill={FUR[mood]} opacity="0.6" />
             </>
           )}
 
-          <motion.ellipse cx={cx} cy={160} ry={16} fill={TINT[mood]} animate={{ rx }} transition={spring} />
+          <motion.ellipse cx={cx} cy={160} ry={16} fill={FUR[mood]} animate={{ rx }} transition={spring} />
           <motion.ellipse
             cx={cx}
             cy={155}
@@ -189,12 +189,12 @@ export default function Bear({ mood, health }: { mood: BearMood; health: number 
           />
 
           <g className="bob" style={{ transformOrigin: `${cx}px 140px` }}>
-            <ellipse cx={cx} cy={131} rx={30} ry={20} fill={TINT[mood]} />
-            <ellipse cx={cx - 22} cy={149} rx={8} ry={5} fill={TINT[mood]} />
-            <ellipse cx={cx + 22} cy={149} rx={8} ry={5} fill={TINT[mood]} />
-            <circle cx={cx + 22} cy={112} r={15} fill={TINT[mood]} />
-            <circle cx={cx + 14} cy={100} r={4.5} fill={TINT[mood]} />
-            <circle cx={cx + 30} cy={100} r={4.5} fill={TINT[mood]} />
+            <ellipse cx={cx} cy={131} rx={30} ry={20} fill={FUR[mood]} />
+            <ellipse cx={cx - 22} cy={149} rx={8} ry={5} fill={FUR[mood]} />
+            <ellipse cx={cx + 22} cy={149} rx={8} ry={5} fill={FUR[mood]} />
+            <circle cx={cx + 22} cy={112} r={15} fill={FUR[mood]} />
+            <circle cx={cx + 14} cy={100} r={4.5} fill={FUR[mood]} />
+            <circle cx={cx + 30} cy={100} r={4.5} fill={FUR[mood]} />
             <circle cx={cx + 19} cy={110} r={1.9} fill="#10202b" />
             <circle cx={cx + 29} cy={110} r={1.9} fill="#10202b" />
             <ellipse cx={cx + 35} cy={116} rx={4} ry={3} fill="#10202b" opacity="0.85" />
