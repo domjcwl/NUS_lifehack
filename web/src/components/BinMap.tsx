@@ -1,17 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 import clsx from "clsx";
 import type { Bin, BinKind, MapPoint } from "@/lib/bins";
 import "leaflet/dist/leaflet.css";
 
 const SG_CENTRE: [number, number] = [1.3521, 103.8198];
 
+const iconCache = new Map<number, L.DivIcon>();
+
+function clusterIcon(count: number): L.DivIcon {
+  const cached = iconCache.get(count);
+  if (cached) return cached;
+  const size = Math.round(Math.min(54, 26 + Math.log2(count) * 5));
+  const icon = L.divIcon({
+    html: `<span>${count}</span>`,
+    className: "bin-cluster",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+  iconCache.set(count, icon);
+  return icon;
+}
+
 const KIND_COLOUR: Record<BinKind, string> = {
-  recycling: "#1d7a99",
-  ewaste: "#e0603c",
-  lighting: "#d99b2b",
+  recycling: "#3ad9a6",
+  ewaste: "#ff7d55",
+  lighting: "#f2bc4c",
 };
 
 const FILTERS: { kind: BinKind; label: string }[] = [
@@ -42,8 +59,8 @@ export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
               className={clsx(
                 "press min-h-11 rounded-full border px-4 text-[0.85rem] font-medium",
                 on
-                  ? "border-transparent text-white"
-                  : "border-[var(--edge)] bg-white/70 text-[var(--ink-soft)]",
+                  ? "border-transparent text-[var(--night-0)] font-semibold"
+                  : "border-[var(--edge)] bg-[var(--night-3)]/50 text-[var(--frost-dim)]",
               )}
               style={on ? { background: KIND_COLOUR[f.kind] } : undefined}
             >
@@ -60,7 +77,7 @@ export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
           minZoom={10}
           maxZoom={18}
           scrollWheelZoom
-          style={{ height: "100%", width: "100%", background: "var(--ice-1)" }}
+          style={{ height: "100%", width: "100%", background: "var(--night-1)" }}
           /* Singapore only — panning to open ocean helps nobody. */
           maxBounds={[
             [1.13, 103.55],
@@ -69,7 +86,7 @@ export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
           maxBoundsViscosity={0.9}
         >
           <TileLayer
-            url="https://www.onemap.gov.sg/maps/tiles/Default/{z}/{x}/{y}.png"
+            url="https://www.onemap.gov.sg/maps/tiles/Night/{z}/{x}/{y}.png"
             attribution='Map &copy; <a href="https://www.onemap.gov.sg/">OneMap</a> &copy; Singapore Land Authority'
             maxZoom={18}
           />
@@ -78,21 +95,11 @@ export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
 
           {points.map((p) =>
             p.cluster ? (
-              <CircleMarker
-                key={`c${p.id}`}
-                center={[p.lat, p.lng]}
-                radius={Math.min(26, 11 + Math.log2(p.count) * 2.6)}
-                pathOptions={{
-                  color: "#ffffff",
-                  weight: 2,
-                  fillColor: "var(--deep)",
-                  fillOpacity: 0.82,
-                }}
-              >
-                <Tooltip direction="center" permanent className="cluster-label">
-                  {p.count}
-                </Tooltip>
-              </CircleMarker>
+              <Marker
+                key={`c${p.lat},${p.lng},${p.count}`}
+                position={[p.lat, p.lng]}
+                icon={clusterIcon(p.count)}
+              />
             ) : (
               <CircleMarker
                 key={`b${p.bin.id}`}
@@ -100,8 +107,8 @@ export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
                 radius={7}
                 eventHandlers={{ click: () => onSelect?.(p.bin) }}
                 pathOptions={{
-                  color: "#ffffff",
-                  weight: 2,
+                  color: "#03101a",
+                  weight: 1.5,
                   fillColor: KIND_COLOUR[p.bin.kind],
                   fillOpacity: 0.95,
                 }}
@@ -121,7 +128,7 @@ export default function BinMap({ onSelect }: { onSelect?: (b: Bin) => void }) {
         </MapContainer>
       </div>
 
-      <p className="text-[11px] text-[var(--ink-soft)]">
+      <p className="text-[11px] text-[var(--frost-dim)]">
         Circles group nearby points — zoom in to split them. Data: NEA via data.gov.sg.
       </p>
     </div>

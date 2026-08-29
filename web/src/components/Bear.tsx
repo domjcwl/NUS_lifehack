@@ -4,28 +4,34 @@ import { motion, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
 import type { BearMood } from "@/lib/types";
 
-const TINT: Record<BearMood, string> = {
-  thriving: "#ffffff",
-  happy: "#fbfcfd",
-  worried: "#f0eee9",
-  fading: "#e6e1d8",
+/** The bear is lit by the ice, so its tint tracks how much ice is left. */
+const FUR: Record<BearMood, string> = {
+  thriving: "#eef8fd",
+  happy: "#e2f0f7",
+  worried: "#c3d4de",
+  fading: "#9aacb8",
 };
 
-const WATER: Record<BearMood, string> = {
-  thriving: "#1d7a99",
-  happy: "#1d7a99",
-  worried: "#17607a",
-  fading: "#0d3b52",
+/** Aurora cools and dims as the floe fails — the sky reacts to the state. */
+const SKY: Record<BearMood, [string, string]> = {
+  thriving: ["#3ad9a6", "#2ba7cd"],
+  happy: ["#2ec9a6", "#2ba7cd"],
+  worried: ["#2b8fb0", "#5a6fc4"],
+  fading: ["#4a5f8a", "#6b5aa8"],
 };
 
-/**
- * The floe width tracks health directly — the loss is visible, which is the
- * whole mechanic. A number on a dashboard would not do this work.
- *
- * Health changes are sprung rather than cut: the ice growing back is the
- * payoff for logging, so it should read as a physical thing settling, not a
- * value snapping to a new number.
- */
+const SEA: Record<BearMood, string> = {
+  thriving: "#0a2a3a",
+  happy: "#0a2635",
+  worried: "#07202d",
+  fading: "#041520",
+};
+
+const STARS = [
+  [28, 26], [62, 44], [104, 18], [148, 36], [196, 22],
+  [232, 52], [268, 30], [84, 62], [176, 60], [252, 14],
+] as const;
+
 export default function Bear({ mood, health }: { mood: BearMood; health: number }) {
   const reduce = useReducedMotion();
   const cx = 150;
@@ -35,7 +41,7 @@ export default function Bear({ mood, health }: { mood: BearMood; health: number 
   const [launch, setLaunch] = useState({ x: 0, y: 0, kind: "idle" as "idle" | "launch" | "splash" });
   const dragStart = useRef<{ x: number; y: number; originX: number; originY: number } | null>(null);
 
-  /* A little bounce is earned here — the ice is recovering, not just updating. */
+  /* A little bounce is earned — the ice recovering is the payoff for logging. */
   const spring = reduce
     ? { duration: 0 }
     : ({ type: "spring", bounce: 0.2, duration: 0.55 } as const);

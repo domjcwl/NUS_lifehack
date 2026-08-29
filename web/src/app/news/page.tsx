@@ -25,9 +25,9 @@ export default function News() {
   return (
     <div className="space-y-5 rise">
       <header>
-        <p className="mono text-[10px] text-[var(--ink-soft)]">Context, not lecture</p>
+        <p className="mono text-[10px] text-[var(--frost-dim)]">Context, not lecture</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Worth knowing</h1>
-        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+        <p className="mt-2 text-sm text-[var(--frost-dim)]">
           Short and practical. Information is not what changes behaviour — the streak does
           that — but knowing why the rules exist makes them easier to follow.
         </p>
@@ -35,7 +35,7 @@ export default function News() {
 
       <div className="rounded-xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-4 py-3">
         <p className="mono text-[10px] text-[var(--gold)]">Sample content</p>
-        <p className="mt-1 text-xs text-[var(--ink-soft)]">
+        <p className="mt-1 text-xs text-[var(--frost-dim)]">
           Written for the prototype. A live build would pull from NEA and campus sustainability
           feeds.
         </p>
@@ -44,9 +44,9 @@ export default function News() {
       <ul className="stagger space-y-3">
         {ITEMS.map((it) => (
           <li key={it.title} className="card px-5 py-4">
-            <p className="mono text-[10px] text-[var(--sea)]">{it.tag}</p>
+            <p className="mono text-[10px] text-[var(--aurora-2)]">{it.tag}</p>
             <h2 className="mt-1.5 font-medium">{it.title}</h2>
-            <p className="mt-1.5 text-sm text-[var(--ink-soft)]">{it.body}</p>
+            <p className="mt-1.5 text-sm text-[var(--frost-dim)]">{it.body}</p>
           </li>
         ))}
       </ul>

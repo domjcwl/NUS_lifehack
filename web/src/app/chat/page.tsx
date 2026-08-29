@@ -38,9 +38,9 @@ export default function Chat() {
   return (
     <div className="flex flex-col gap-4 rise pb-20">
       <header>
-        <p className="mono text-[10px] text-[var(--ink-soft)]">At the point of decision</p>
+        <p className="mono text-[10px] text-[var(--frost-dim)]">At the point of decision</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Which bin?</h1>
-        <p className="mt-2 text-sm text-[var(--ink-soft)]">
+        <p className="mt-2 text-sm text-[var(--frost-dim)]">
           Hesitation is where recyclables end up in general waste. Ask and go.
         </p>
       </header>
@@ -52,7 +52,7 @@ export default function Chat() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="press hoverable min-h-11 rounded-full border border-[var(--edge)] bg-white/60 px-4 text-[0.85rem]"
+                className="press hoverable min-h-11 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-[0.85rem]"
               >
                 {s}
               </button>
@@ -64,14 +64,14 @@ export default function Chat() {
             key={i}
             className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
               m.role === "user"
-                ? "ml-auto bg-[var(--deep)] text-white"
+                ? "ml-auto btn-primary "
                 : "card"
             }`}
           >
             {m.content}
           </div>
         ))}
-        {busy && <p className="mono text-[10px] text-[var(--sea)]">Thinking…</p>}
+        {busy && <p className="mono text-[10px] text-[var(--aurora-2)]">Thinking…</p>}
       </div>
 
       <form
@@ -87,12 +87,12 @@ export default function Chat() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about an item…"
           /* 16px minimum stops iOS zooming the viewport on focus. */
-          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-white/90 px-5 text-base outline-none backdrop-blur transition-colors focus:border-[var(--sea)]"
+          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/70 px-5 text-base outline-none backdrop-blur transition-colors focus:border-[var(--aurora-2)]"
         />
         <button
           type="submit"
           disabled={busy}
-          className="press min-h-14 shrink-0 rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25 disabled:opacity-40"
+          className="press min-h-14 shrink-0 rounded-full btn-primary px-6 text-[0.95rem] font-medium   disabled:opacity-40"
         >
           Ask
         </button>

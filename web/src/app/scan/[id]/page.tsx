@@ -83,11 +83,11 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
     <>
       <div className="stagger space-y-4">
         <div>
-          <Link href="/" className="mono press inline-block text-[10px] text-[var(--ink-soft)]">
+          <Link href="/" className="mono press inline-block text-[10px] text-[var(--frost-dim)]">
             ← Nanuq
           </Link>
           <h1 className="mt-2 text-[1.55rem] font-semibold">Blk 826A Tampines St 81</h1>
-          <p className="mt-1 text-[0.95rem] text-[var(--ink-soft)]">
+          <p className="mt-1 text-[0.95rem] text-[var(--frost-dim)]">
             Hold the item at the blue bin and take one photo. This slot works once.
           </p>
         </div>
@@ -96,8 +96,8 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
           {preview ? (
             <img src={preview} alt="Your photo" className="aspect-[4/3] w-full object-cover" />
           ) : (
-            <div className="flex aspect-[4/3] items-center justify-center bg-[var(--ice-1)]">
-              <p className="mono text-[10px] text-[var(--ink-soft)]">No photo yet</p>
+            <div className="flex aspect-[4/3] items-center justify-center bg-[var(--night-3)]">
+              <p className="mono text-[10px] text-[var(--frost-dim)]">No photo yet</p>
             </div>
           )}
 
@@ -105,8 +105,8 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             <div className="px-5 py-5">
               {phase === "checking" && (
                 <div className="flex items-center gap-2.5">
-                  <span className="size-2 animate-pulse rounded-full bg-[var(--sea)]" />
-                  <p className="mono text-[11px] text-[var(--sea)]">Checking the photo…</p>
+                  <span className="size-2 animate-pulse rounded-full bg-[var(--aurora-2)]" />
+                  <p className="mono text-[11px] text-[var(--aurora-2)]">Checking the photo…</p>
                 </div>
               )}
 
@@ -120,7 +120,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
                 >
                   <p
                     className={`mono text-[11px] ${
-                      verdict.verified ? "text-[var(--sea)]" : "text-[var(--coral)]"
+                      verdict.verified ? "text-[var(--aurora-2)]" : "text-[var(--coral)]"
                     }`}
                   >
                     {verdict.verified ? "Verified" : "Not counted"}
@@ -137,19 +137,19 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
                       >
                         {streak}
                       </motion.span>
-                      <span className="mono text-[10px] text-[var(--ink-soft)]">day streak</span>
+                      <span className="mono text-[10px] text-[var(--frost-dim)]">day streak</span>
                     </div>
                   )}
 
                   {verdict.stubbed && (
-                    <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-[11px] text-[var(--ink-soft)]">
+                    <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-[11px] text-[var(--frost-dim)]">
                       Demo mode: no API key on this machine, so the photo was not actually
                       checked. Set ANTHROPIC_API_KEY to run real validation.
                     </p>
                   )}
 
                   {verdict.verified && !verdict.correctlySorted && (
-                    <p className="rounded-lg bg-[var(--ice-1)] px-3 py-2 text-xs text-[var(--ink-soft)]">
+                    <p className="rounded-lg bg-[var(--night-3)] px-3 py-2 text-xs text-[var(--frost-dim)]">
                       Looks like the wrong stream — it belongs in {verdict.stream}.
                     </p>
                   )}
@@ -171,14 +171,14 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             <>
               <Link
                 href="/"
-                className="press flex min-h-14 flex-1 items-center justify-center rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25"
+                className="press flex min-h-14 flex-1 items-center justify-center rounded-full btn-primary px-6 text-[0.95rem] font-medium  "
               >
                 Back to Nanuq
               </Link>
               {!verdict.verified && (
                 <button
                   onClick={retry}
-                  className="press min-h-14 rounded-full border border-[var(--edge)] bg-white/80 px-6 text-[0.95rem]"
+                  className="press min-h-14 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/60 px-6 text-[0.95rem]"
                 >
                   Retake
                 </button>
@@ -188,7 +188,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={phase === "checking"}
-              className="press flex min-h-14 w-full items-center justify-center rounded-full bg-[var(--deep)] px-6 text-[0.95rem] font-medium text-white shadow-lg shadow-[var(--deep)]/25 disabled:opacity-60"
+              className="press flex min-h-14 w-full items-center justify-center rounded-full btn-primary px-6 text-[0.95rem] font-medium   disabled:opacity-60"
             >
               {phase === "checking" ? "Checking…" : "Take the photo"}
             </button>

@@ -155,6 +155,8 @@ dropped database connection. It is a single module to swap.
 - **Next.js 16**, **React 19**, **Tailwind CSS 4** — application framework and styling,
   scaffolded with `create-next-app` during the event.
 - **motion** (Framer Motion) — spring animations; **clsx** — conditional class names.
+- **Bricolage Grotesque** and **IBM Plex Mono** (Google Fonts, via `next/font`) — display
+  and data type respectively.
 - **Design guidance** from [emilkowalski/skills](https://github.com/emilkowalski/skills) (MIT) —
   `emil-design-eng` and `apple-design` informed the motion, easing and mobile interaction
   decisions. Guidance only; none of that repo's code ships here.
@@ -166,7 +168,7 @@ dropped database connection. It is a single module to swap.
   Singapore Open Data Licence. `scripts/fetch-bins.py` and `scripts/build-bins.py`
   reproduce `web/data/bins.json` from source.
 - **Basemap tiles from [OneMap](https://www.onemap.gov.sg/)** © Singapore Land Authority —
-  the official national basemap, no API key required.
+  the official national basemap (Night style), no API key required.
 - **Leaflet** / **react-leaflet** for the map, **supercluster** for server-side clustering.
 - Impact-screen cohort figures are **simulated**, as described above.
 - Singapore recycling guidance in the assistant's prompt reflects publicly documented NEA
