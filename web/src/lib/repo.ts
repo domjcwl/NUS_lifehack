@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { db } from "./db";
+import { POINTS, type PointReason } from "./level";
 
 /**
  * The whole data layer. Every query in the app lives here, so swapping SQLite
@@ -15,6 +16,15 @@ export interface User {
   createdAt: number;
 }
 
+export interface Group {
+  id: string;
+  name: string;
+  inviteCode: string;
+  creatorId: string;
+  createdAt: number;
+  memberCount: number;
+}
+
 export interface ActionRow {
   id: string;
   userId: string;
@@ -24,6 +34,7 @@ export interface ActionRow {
   verified: boolean;
   confidence: number;
   reason: string;
+  mediaHash?: string | null;
 }
 
 const id = () => randomBytes(9).toString("base64url");
@@ -192,10 +203,20 @@ export function destroySession(token: string | undefined): void {
 export function addAction(a: Omit<ActionRow, "id">): void {
   db()
     .prepare(
-      `INSERT INTO actions (id, user_id, at, bin_id, item, verified, confidence, reason)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO actions (id, user_id, at, bin_id, item, verified, confidence, reason, media_hash)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-    .run(id(), a.userId, a.at, a.binId, a.item, a.verified ? 1 : 0, a.confidence, a.reason);
+    .run(
+      id(),
+      a.userId,
+      a.at,
+      a.binId,
+      a.item,
+      a.verified ? 1 : 0,
+      a.confidence,
+      a.reason,
+      a.mediaHash ?? null,
+    );
 }
 
 export function actionsFor(userId: string): ActionRow[] {
@@ -232,44 +253,7 @@ export function seedHistory(userId: string): void {
   });
 }
 
-/* ── Friends ───────────────────────────────────────────────────────────── */
-
-/** Mutual on add — a hackathon simplification, noted in the README. */
-export function addFriend(userId: string, friendId: string): void {
-  if (userId === friendId) return;
-  const stmt = db().prepare(
-    "INSERT OR IGNORE INTO friendships (user_id, friend_id, created_at) VALUES (?, ?, ?)",
-  );
-  const now = Date.now();
-  stmt.run(userId, friendId, now);
-  stmt.run(friendId, userId, now);
-}
-
-export function removeFriend(userId: string, friendId: string): void {
-  const stmt = db().prepare(
-    "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?",
-  );
-  stmt.run(userId, friendId);
-  stmt.run(friendId, userId);
-}
-
-export function friendsOf(userId: string): User[] {
-  const rows = db()
-    .prepare(
-      `SELECT u.* FROM friendships f JOIN users u ON u.id = f.friend_id
-       WHERE f.user_id = ? ORDER BY u.display_name`,
-    )
-    .all(userId) as Record<string, unknown>[];
-  return rows.map(rowToUser);
-}
-
-export function isFriend(userId: string, friendId: string): boolean {
-  return (
-    db()
-      .prepare("SELECT 1 AS x FROM friendships WHERE user_id = ? AND friend_id = ?")
-      .get(userId, friendId) !== undefined
-  );
-}
+/* ── User search ───────────────────────────────────────────────────────── */
 
 /** Prefix-first search over claimed accounts, excluding the searcher. */
 export function searchUsers(query: string, excludeId: string, limit = 12): User[] {
@@ -311,4 +295,126 @@ export function getInstance(instanceId: string) {
 
 export function markInstanceUsed(instanceId: string, userId: string): void {
   db().prepare("UPDATE scan_instances SET used_by = ? WHERE id = ?").run(userId, instanceId);
+}
+
+/* ── Points and XP ─────────────────────────────────────────────────────── */
+
+export function awardPoints(userId: string, reason: PointReason): void {
+  db()
+    .prepare(
+      "INSERT INTO point_transactions (id, user_id, points, reason, created_at) VALUES (?, ?, ?, ?, ?)",
+    )
+    .run(id(), userId, POINTS[reason], reason, Date.now());
+}
+
+/** XP is the sum of the ledger, never a stored counter that can drift. */
+export function xpFor(userId: string): number {
+  const r = db()
+    .prepare("SELECT COALESCE(SUM(points), 0) AS xp FROM point_transactions WHERE user_id = ?")
+    .get(userId) as Record<string, unknown>;
+  return Number(r.xp ?? 0);
+}
+
+export function pointHistory(userId: string, limit = 8) {
+  const rows = db()
+    .prepare(
+      "SELECT points, reason, created_at FROM point_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+    )
+    .all(userId, limit) as Record<string, unknown>[];
+  return rows.map((r) => ({
+    points: Number(r.points),
+    reason: String(r.reason) as PointReason,
+    at: Number(r.created_at),
+  }));
+}
+
+/* ── Groups ────────────────────────────────────────────────────────────── */
+
+/* No 0/O or 1/I/L — the code gets read aloud and typed by someone else. */
+const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+function newInviteCode(): string {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const bytes = randomBytes(6);
+    const code = [...bytes].map((b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+    if (!db().prepare("SELECT 1 AS x FROM groups WHERE invite_code = ?").get(code)) return code;
+  }
+  throw new Error("Could not allocate an invite code.");
+}
+
+function groupRow(r: Record<string, unknown>): Group {
+  return {
+    id: String(r.id),
+    name: String(r.name),
+    inviteCode: String(r.invite_code),
+    creatorId: String(r.creator_id),
+    createdAt: Number(r.created_at),
+    memberCount: Number(r.member_count ?? 0),
+  };
+}
+
+const GROUP_SELECT = `SELECT g.*, (SELECT COUNT(*) FROM group_members m WHERE m.group_id = g.id) AS member_count FROM groups g`;
+
+export function createGroup(userId: string, name: string): Group {
+  const groupId = id();
+  const now = Date.now();
+  db()
+    .prepare(
+      "INSERT INTO groups (id, name, invite_code, creator_id, created_at) VALUES (?, ?, ?, ?, ?)",
+    )
+    .run(groupId, name.trim().slice(0, 60) || "Our block", newInviteCode(), userId, now);
+  db()
+    .prepare("INSERT INTO group_members (group_id, user_id, joined_at) VALUES (?, ?, ?)")
+    .run(groupId, userId, now);
+  return getGroup(groupId)!;
+}
+
+export function getGroup(groupId: string): Group | null {
+  const r = db().prepare(`${GROUP_SELECT} WHERE g.id = ?`).get(groupId);
+  return r ? groupRow(r as Record<string, unknown>) : null;
+}
+
+export function getGroupByCode(code: string): Group | null {
+  const r = db().prepare(`${GROUP_SELECT} WHERE g.invite_code = ?`).get(code.trim().toUpperCase());
+  return r ? groupRow(r as Record<string, unknown>) : null;
+}
+
+export function groupsFor(userId: string): Group[] {
+  const rows = db()
+    .prepare(
+      `SELECT g.*, (SELECT COUNT(*) FROM group_members m2 WHERE m2.group_id = g.id) AS member_count
+       FROM group_members m JOIN groups g ON g.id = m.group_id
+       WHERE m.user_id = ? ORDER BY m.joined_at`,
+    )
+    .all(userId) as Record<string, unknown>[];
+  return rows.map(groupRow);
+}
+
+export function joinGroup(userId: string, groupId: string): void {
+  db()
+    .prepare("INSERT OR IGNORE INTO group_members (group_id, user_id, joined_at) VALUES (?, ?, ?)")
+    .run(groupId, userId, Date.now());
+}
+
+export function leaveGroup(userId: string, groupId: string): void {
+  db().prepare("DELETE FROM group_members WHERE group_id = ? AND user_id = ?").run(groupId, userId);
+}
+
+export function membersOf(groupId: string): User[] {
+  const rows = db()
+    .prepare(
+      `SELECT u.* FROM group_members m JOIN users u ON u.id = m.user_id
+       WHERE m.group_id = ? ORDER BY m.joined_at`,
+    )
+    .all(groupId) as Record<string, unknown>[];
+  return rows.map(rowToUser);
+}
+
+/** Has this exact photo already been logged by this person? */
+export function hashSeen(userId: string, mediaHash: string): boolean {
+  return (
+    db()
+      .prepare("SELECT 1 AS x FROM actions WHERE user_id = ? AND media_hash = ?")
+      .get(userId, mediaHash) !== undefined
+  );
 }

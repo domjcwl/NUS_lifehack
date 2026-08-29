@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
+import { scaleFor } from "@/lib/level";
 import type { BearMood } from "@/lib/types";
 
 /** The bear is lit by the ice, so its tint tracks how much ice is left. */
@@ -37,10 +38,13 @@ export default function Bear({
   health,
   /** Health as it stood before the action that just landed, if there was one. */
   fromHealth,
+  /** Drives how big the animal is drawn. Points buy growth, not a badge. */
+  level = 1,
 }: {
   mood: BearMood;
   health: number;
   fromHealth?: number;
+  level?: number;
 }) {
   const reduce = useReducedMotion();
   const cx = 150;
@@ -61,6 +65,7 @@ export default function Bear({
     ? { duration: 0 }
     : ({ type: "spring", bounce: 0.2, duration: 0.55 } as const);
   const fade = { duration: reduce ? 0 : 0.7 };
+  const growth = scaleFor(level);
 
   function handlePointerDown(event: React.PointerEvent<SVGGElement>) {
     if (reduce) return;
@@ -269,6 +274,14 @@ export default function Bear({
             transition={spring}
           />
 
+          <motion.g
+            initial={false}
+            animate={{ scale: growth }}
+            transition={
+              reduce ? { duration: 0 } : { type: "spring", bounce: 0.3, duration: 0.7 }
+            }
+            style={{ transformOrigin: `${cx}px 152px` }}
+          >
           <g className="bob" style={{ transformOrigin: `${cx}px 138px` }}>
             <motion.g animate={{ fill: FUR[mood] }} transition={fade}>
               <ellipse cx={cx} cy={130} rx={30} ry={20} />
@@ -291,6 +304,7 @@ export default function Bear({
               />
             )}
           </g>
+          </motion.g>
         </motion.g>
       </g>
     </svg>

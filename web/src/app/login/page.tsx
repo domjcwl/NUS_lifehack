@@ -21,8 +21,8 @@ function LoginForm() {
   const params = useSearchParams();
   /* Only ever return to an in-app path, so ?next= cannot be used to bounce
      someone to another origin. */
-  const raw = params.get("next") ?? "/friends";
-  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/friends";
+  const raw = params.get("next") ?? "/group";
+  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/group";
 
   const [mode, setMode] = useState<Mode>(params.get("mode") === "signin" ? "signin" : "create");
   const [username, setUsername] = useState("");

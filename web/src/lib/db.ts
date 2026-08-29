@@ -44,7 +44,32 @@ function migrate(db: DatabaseSync) {
       item       TEXT NOT NULL,
       verified   INTEGER NOT NULL,
       confidence REAL,
-      reason     TEXT
+      reason     TEXT,
+      media_hash TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS groups (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      invite_code TEXT NOT NULL UNIQUE,
+      creator_id  TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at  INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS group_members (
+      group_id  TEXT NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      joined_at INTEGER NOT NULL,
+      PRIMARY KEY (group_id, user_id)
+    );
+
+    /* A ledger rather than a running total, so every point can be explained. */
+    CREATE TABLE IF NOT EXISTS point_transactions (
+      id         TEXT PRIMARY KEY,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      points     INTEGER NOT NULL,
+      reason     TEXT NOT NULL,
+      created_at INTEGER NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS friendships (
@@ -62,8 +87,28 @@ function migrate(db: DatabaseSync) {
     );
 
     CREATE INDEX IF NOT EXISTS idx_actions_user ON actions(user_id, at DESC);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_actions_hash ON actions(user_id, media_hash)
+      WHERE media_hash IS NOT NULL;
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_points_user ON point_transactions(user_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_members_user ON group_members(user_id);
   `);
+}
+
+/**
+ * CREATE TABLE IF NOT EXISTS cannot add a column to a table that already
+ * exists, so an existing floe.db needs the new columns applied explicitly.
+ */
+function addMissingColumns(db: DatabaseSync) {
+  const wanted: Record<string, string> = { media_hash: "TEXT" };
+  const existing = new Set(
+    (db.prepare("PRAGMA table_info(actions)").all() as Record<string, unknown>[]).map((c) =>
+      String(c.name),
+    ),
+  );
+  for (const [column, type] of Object.entries(wanted)) {
+    if (!existing.has(column)) db.exec(`ALTER TABLE actions ADD COLUMN ${column} ${type}`);
+  }
 }
 
 export function db(): DatabaseSync {
@@ -71,6 +116,7 @@ export function db(): DatabaseSync {
     mkdirSync(path.dirname(DB_PATH), { recursive: true });
     const conn = new DatabaseSync(DB_PATH);
     migrate(conn);
+    addMissingColumns(conn);
     g.__floeDb = conn;
   }
   return g.__floeDb;
