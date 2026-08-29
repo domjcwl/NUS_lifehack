@@ -64,9 +64,16 @@ def reset_model_state() -> None:
 # node 1: contextualize
 # ---------------------------------------------------------------------------
 
+# How much of the conversation the model is shown. Ten messages is five
+# exchanges — far more than a bin-side conversation ever runs to, and a bound
+# that stops a long session growing the prompt without limit.
+HISTORY_WINDOW = 10
+
 # Openers and bare pronouns that mean the message cannot be understood alone.
-# "What about the charger?" retrieves nothing useful; "how do I dispose of a
-# laptop charger?" retrieves the right chunk.
+# Only used on the offline path now: with a model, every message after the first
+# is contextualized against the conversation, because the heuristic could only
+# ever catch the follow-ups someone thought to list. "Which one is closest?"
+# matches; "is the blue one fine?" does not, and both need the same context.
 _FOLLOW_UP_OPENERS = ("what about", "how about", "and the", "and what", "what if", "ok what")
 _BARE_PRONOUNS = (" it", " it?", "it ", "them", "those", "these", "that one", "this one")
 
@@ -79,37 +86,57 @@ def _looks_like_follow_up(question: str) -> bool:
     return len(q) < 60 and any(p in f" {q} " for p in _BARE_PRONOUNS)
 
 
-def _previous_user_message(state: ChatState) -> str:
-    """The user turn before this one, if any."""
-    history = state.get("messages", [])
-    earlier = [m for m in history[:-1] if m.get("role") == "user"]
-    return earlier[-1]["content"] if earlier else ""
+def _history(state: ChatState) -> list[dict[str, str]]:
+    """The conversation before this turn, most recent `HISTORY_WINDOW` messages."""
+    return list(state.get("messages", [])[:-1])[-HISTORY_WINDOW:]
+
+
+def _previous_user_messages(state: ChatState, limit: int = 3) -> list[str]:
+    """The user's earlier turns, oldest first."""
+    earlier = [m["content"] for m in _history(state) if m.get("role") == "user"]
+    return earlier[-limit:]
+
+
+def _transcript(state: ChatState) -> str:
+    """The conversation as plain text, for a model that is being asked about it."""
+    return "\n".join(
+        f"{'User' if m.get('role') == 'user' else 'Assistant'}: {m.get('content', '')}"
+        for m in _history(state)
+    )
 
 
 def contextualize(state: ChatState) -> dict[str, Any]:
-    """Rewrite a follow-up into a question that stands on its own.
+    """Rewrite the message into a question that stands on its own.
 
-    Skipped entirely when the message reads as self-contained, so the common case
-    pays nothing. With no model, the previous turn is offered to `retrieve` as a
-    fallback rather than searched directly — see the comment below for why joining
-    the two questions outright gives the wrong answer.
+    The first message of a session skips this entirely — there is nothing to
+    resolve it against. Every message after it is rewritten against the
+    conversation so far, so retrieval searches for what the user means rather
+    than for the words they typed. "Which one is closest?" is a fine thing to say
+    out loud at a bin and a useless thing to hand to BM25.
+
+    With no model, the recent turns are offered to `retrieve` as a fallback
+    rather than searched directly — see the comment below for why joining them
+    outright gives the wrong answer.
     """
     question = state["question"]
-    if not _looks_like_follow_up(question):
-        return {"query": question}
-
-    previous = _previous_user_message(state)
-    if not previous:
+    history = _history(state)
+    if not history:
         return {"query": question}
 
     client = _client()
     if client is None:
+        # Offline the heuristic still earns its place: without a rewrite, joining
+        # is all we have, and joining is only safe when the message really cannot
+        # stand alone.
+        previous = _previous_user_messages(state)
+        if not previous or not _looks_like_follow_up(question):
+            return {"query": question}
         # Offer the joined text as a fallback rather than searching with it. Joining
-        # lets the PREVIOUS question's terms outscore this one - ask "what about the
+        # lets the EARLIER questions' terms outscore this one - ask "what about the
         # charger?" after a laptop question and BM25 returns the laptop chunk. So
         # `retrieve` tries the bare question first and only falls back when it
         # genuinely matches nothing.
-        return {"query": question, "fallback_query": f"{previous} {question}"}
+        return {"query": question, "fallback_query": " ".join([*previous, question])}
 
     try:
         response = client.chat.completions.create(
@@ -118,15 +145,18 @@ def contextualize(state: ChatState) -> dict[str, Any]:
                 {
                     "role": "system",
                     "content": (
-                        "Rewrite the follow-up as one standalone question about waste "
-                        "disposal in Singapore, resolving what the pronoun refers to "
-                        "from the previous question. Reply with the question only, no "
+                        "Rewrite the user's latest message as one standalone question "
+                        "about waste disposal in Singapore, resolving anything it refers "
+                        "back to using the conversation. Reply with the question only, no "
                         "preamble. If it is already standalone, repeat it unchanged."
                     ),
                 },
                 {
                     "role": "user",
-                    "content": f"Previous question: {previous}\nFollow-up: {question}",
+                    "content": (
+                        f"Conversation so far:\n{_transcript(state)}\n\n"
+                        f"Latest message: {question}"
+                    ),
                 },
             ],
             max_completion_tokens=60,
@@ -137,8 +167,13 @@ def contextualize(state: ChatState) -> dict[str, Any]:
         logger.info("Contextualized %r -> %r", question, rewritten)
         return {"query": rewritten}
     except Exception as exc:
+        # The rewrite failed, so fall back to the offline behaviour for this turn:
+        # search the bare question, with the joined history available if it misses.
         _break_model(exc)
-        return {"query": question, "fallback_query": f"{previous} {question}"}
+        previous = _previous_user_messages(state)
+        if not previous or not _looks_like_follow_up(question):
+            return {"query": question}
+        return {"query": question, "fallback_query": " ".join([*previous, question])}
 
 
 # ---------------------------------------------------------------------------
@@ -369,11 +404,16 @@ it goes.
 Answer in one or two sentences. Lead with the verdict - which bin, or that it is \
 not recyclable - then the reason only if it is not obvious.
 
-You must use ONLY the reference material provided in the user message. It is the \
-authoritative source. If the reference material does not answer the question, say \
-you are not sure and suggest general waste or checking the NEA website. Never \
-invent a disposal instruction: a confidently wrong answer sends a battery into a \
-recycling truck.
+You must use ONLY the reference material in the final user message for disposal \
+facts. It is the authoritative source. If it does not answer the question, say you \
+are not sure and suggest general waste or checking the NEA website. Never invent a \
+disposal instruction: a confidently wrong answer sends a battery into a recycling \
+truck.
+
+Earlier messages are there so you know what the person is referring to and what \
+you have already told them - do not repeat yourself, and do not treat your own \
+earlier replies as evidence. If an earlier reply is not supported by the reference \
+material in front of you now, do not restate it.
 
 If nearby collection points are listed, name the closest one and its distance \
 exactly as given. Never invent a place name, an address or a distance.
@@ -464,11 +504,23 @@ def generate(state: ChatState) -> dict[str, Any]:
     if block := _bins_block(state):
         reference = f"{reference}\n\n{block}"
 
+    # The conversation goes in ahead of the reference material so the model can
+    # answer "which one did you say was closest?" — a question about the chat
+    # itself, which no amount of retrieval can answer. The reference block and
+    # the standalone rewrite still come last, so the current turn is what gets
+    # answered and the material for it is the freshest thing in the prompt.
+    history: list[dict[str, str]] = [
+        {"role": m["role"], "content": m["content"]}
+        for m in _history(state)
+        if m.get("role") in ("user", "assistant") and m.get("content", "").strip()
+    ]
+
     try:
         response = client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
+                *history,
                 {
                     "role": "user",
                     "content": (

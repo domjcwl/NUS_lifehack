@@ -356,3 +356,77 @@ thesis is that points are not the reward, the bear is — and a leaderboard pull
 Keeping the animal in the row is how both survive. The number says who is ahead; the bear says
 how they are actually doing, including when someone at the top of the board has a floe that is
 melting.
+
+## The chat tab is a client of the Python service, not a second chatbot (Sat 29 Aug, ~22:00)
+
+`web/src/app/api/chat/route.ts` was a system prompt and one `chat.completions.create`. The
+service in `fastAPI_chatbot/` was retrieval over a curated NEA knowledge base, a place-name
+geocoder, a search across the same 13,004 bins the map draws, and a ground check on the
+finished answer — with nothing calling it. Two chatbots, one of them better and unreachable.
+
+The route is now a proxy. All the logic stays in Python; `web/src/lib/chatbot.ts` holds the
+types and the URL, and is the only file in the app that knows the service exists.
+
+**The reply is no longer a string.** It carries the sources it drew on, the collection points
+it found, whether it was grounded and whether a model wrote it — and the UI shows all four.
+An assistant that says "e-waste point, 362 m away, here are directions" with an NEA citation
+under it is a different claim from one that says "e-waste, probably", and a judge should be
+able to see which one they got without asking us.
+
+Two things follow from that, both about not overstating what we have. A source whose snippet
+is our own summary of public guidance is labelled *further reading*, not quoted as NEA's
+words. And an ungrounded answer is marked on screen as a guess.
+
+**The fallback is deliberate and it is visibly worse.** If the Python service is not running
+— one forgotten terminal at a judging table — the route answers with a single ungrounded
+model call and says so in the reply. The alternative was a chat tab that dies when a second
+process does, which is a worse thing to discover at 12:30 on Sunday. But a degraded answer
+that looks identical to a good one would be worse still, so it does not.
+
+`GET /api/chat/health` reports whether the service is up and what it loaded, so that is one
+curl before judging rather than a discovery mid-question.
+
+## Every turn is answered against the whole conversation (Sat 29 Aug, ~23:00)
+
+The frontend was already sending the full transcript. The graph was throwing most of it away.
+
+`contextualize` only looked at the single previous **user** message, and only when a keyword
+heuristic fired — a list of openers like "what about" and a handful of bare pronouns. So
+"is that the same place I take the batteries?" three turns after the laptop question resolved
+against the wrong turn, and "does the same rule apply to a used paper cup?" matched no keyword
+at all and went to BM25 as-is. And `generate` never saw the conversation, only the rewritten
+query, which made "how far did you say that was?" unanswerable in principle.
+
+Now: the first message of a session skips contextualization, because there is nothing to
+resolve it against. **Every message after it is rewritten against the transcript**, heuristic
+removed — it could only ever catch the follow-ups someone thought to list, and the failure is
+silent. `generate` gets the prior turns ahead of the reference block.
+
+The window is ten messages. Place-name lookup still scans the entire history unwindowed —
+someone who said "I'm at Raffles Hall" in message one should not have to repeat it.
+
+**The heuristic survives on the offline path**, where there is no model to rewrite with and
+joining questions is the only tool available. Joining is lossy — the earlier question's terms
+outscore the current one — so it stays gated to messages that genuinely cannot stand alone.
+
+The system prompt now separates the two kinds of context explicitly: reference material is the
+only source for disposal facts, earlier turns are only for knowing what the person means and
+what they have already been told. Without that line the model can launder its own earlier
+answer into a new one that retrieval no longer supports — the ground check would catch it, but
+after the fact.
+
+The cost is one extra ~60-token call on every turn after the first. That is the price of the
+feature, and it buys the difference between a chat and a series of unrelated questions.
+
+## A refresh button, because a demo runs many times (Sat 29 Aug, ~23:15)
+
+Judging is a walking format: the same conversation gets started a dozen times in two hours,
+and the previous judge's questions must not be in the context of the next one's.
+
+**It clears the coordinates too.** Someone starting a new session may have walked somewhere
+else, and silently reusing a position from ten minutes ago sends them to a bin that is no
+longer nearest — a wrong answer with no visible cause. The next location question re-asks.
+
+Top-right, and deliberately far from the send button at the bottom of the screen. A thumb
+reaching to ask a question should never be able to land on "erase everything". It appears
+only once there is something to clear.

@@ -85,13 +85,29 @@ brief permits mocked inputs; it does not permit presenting them as real.
 
 ## Running it
 
-Requires Node 20+.
+Requires Node 20+ and Python 3.12+.
 
 ```bash
 cd web
 npm install
 npm run dev          # http://localhost:3000
 ```
+
+The **chat tab talks to a second process** — the knowledge service in
+`fastAPI_chatbot/`, which is what turns "which bin?" into an answer with NEA
+sources and a real collection point attached. Start it in a second terminal:
+
+```bash
+cd fastAPI_chatbot
+python -m venv venv && venv/Scripts/activate   # source venv/bin/activate on mac/linux
+pip install -r requirements.txt
+python -m uvicorn app.main:app --port 8000
+```
+
+`http://localhost:3000/api/chat/health` says in one line whether the app can see
+it. **Without it the chat tab still answers** — one ungrounded model call, marked
+on screen as a guess with no sources and no bins. Every other tab is unaffected;
+the service only owns chat. Set `CHATBOT_URL` if you move it off port 8000.
 
 ### API key
 
@@ -106,7 +122,7 @@ OPENAI_API_KEY=sk-proj-...
 ```
 
 `OPENAI_MODEL` and `OPENAI_VISION_MODEL` are optional overrides; their defaults
-mirror `backend/app/config.py` so the two services stay in step.
+mirror `fastAPI_chatbot/app/config.py` so the two services stay in step.
 
 **Without a key the app still runs.** The validator returns a stubbed verdict and the UI
 says so explicitly on screen — so the demo survives a dead network, without ever pretending
@@ -260,6 +276,13 @@ web/src/
     bins/  chat/  news/   friction removers and context
     api/validate/         Claude vision verification
     api/log/              action log, points, bear state
+    api/chat/             proxy to the knowledge service (+ /health)
+  lib/chatbot.ts          typed client for it, and the one place its URL lives
+
+fastAPI_chatbot/          the chat knowledge service — answers, sources, nearest bin
+  app/graph/              LangGraph state machine
+  app/rag/                BM25 retrieval over the NEA knowledge base
+  app/tools/              bin search and geocoding
   components/Bear.tsx     SVG floe that shrinks with health
   lib/bear.ts             mood, health, streak logic
   lib/store.ts            in-memory store + campus bin data
@@ -286,6 +309,14 @@ dropped database connection. It is a single module to swap.
 - **OpenAI API** (`openai`, `gpt-4o-mini`) — photo verification and the recycling
   assistant. Chosen over a second provider so one key covers both the Next.js app
   and the Python backend.
+- **FastAPI**, **Uvicorn**, **pydantic-settings** and **LangGraph** — the chat knowledge
+  service in `fastAPI_chatbot/`. LangGraph runs the answer as an explicit state machine
+  (classify → retrieve → locate → generate → ground-check) rather than one model call.
+  **pypdf** is used only by `scripts/ingest.py` to chunk NEA documents, never at request time.
+- **Place-name lookup** uses [OneMap](https://www.onemap.gov.sg/) (© Singapore Land Authority)
+  when a token is configured, otherwise [Nominatim](https://nominatim.openstreetmap.org/)
+  © OpenStreetMap contributors, ODbL. Results are cached to disk, so the demo does not
+  depend on either being reachable.
 - **Bin locations are real open government data**, not samples: NEA's *Recycling Bins*
   (12,291 points) and *E-waste Recycling* (713) datasets, retrieved from
   [data.gov.sg](https://data.gov.sg) on 29 Aug 2026 under the
