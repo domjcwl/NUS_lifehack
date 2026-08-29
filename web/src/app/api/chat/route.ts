@@ -14,7 +14,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { answerAt, answerNearest, placeFrom } from "@/lib/places";
+import { answerAt, answerNearest, looksLocational, placeFrom } from "@/lib/places";
 import OpenAI from "openai";
 
 import {
@@ -74,7 +74,11 @@ export async function POST(req: Request) {
    * resolved somewhere itself.
    */
   const asked = messages[messages.length - 1]?.content ?? "";
-  const wantsPlace = reply.intent === "location" || reply.needs_location;
+  /* The text is consulted as well as the reply's own classification: with the
+     knowledge service unreachable nothing sets `intent`, so trusting that
+     field alone made this work locally and do nothing in production. */
+  const wantsPlace =
+    reply.intent === "location" || reply.needs_location || looksLocational(asked);
   if (wantsPlace) {
     /* The service resolves some places itself but answers in prose that never
        names a bin. Whoever resolved the spot, the reply is rebuilt from this

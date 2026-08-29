@@ -14,6 +14,18 @@ import { nearest, type BinKind } from "@/lib/bins";
  * `nearest()` it turns a vague question into a named bin and a distance.
  */
 
+/**
+ * Whether a question is asking *where*, judged from the text alone.
+ *
+ * Needed because the knowledge service classifies intent and, when it is
+ * unreachable, nothing does — which is exactly the case on a deployment where
+ * the service does not run. Relying on its `intent` field meant location
+ * answering worked locally and silently did nothing in production.
+ */
+export function looksLocational(text: string): boolean {
+  return /(nearest|closest|near|nearby|where|around here|next to)/i.test(text);
+}
+
 /** Where a question points, if anywhere. */
 export function placeFrom(text: string): string | null {
   const q = text.trim().replace(/[?!.]+$/, "");
