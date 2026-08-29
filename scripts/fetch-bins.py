@@ -14,8 +14,6 @@ DATASETS = {
     "sg_recycling": "d_4dde14826642f49eefff48b7832b90db",
     # collection 1443 — E-waste Recycling (NEA)
     "sg_ewaste": "d_db40d004afeb5a7f0f555fdcc34934cc",
-    # collection 1448 — Lighting Waste Collection Points (NEA)
-    "sg_lighting": "d_6226f69998ed0cb62151af37706508cd",
 }
 
 POLL = "https://api-open.data.gov.sg/v1/public/api/datasets/{}/poll-download"

@@ -37,7 +37,6 @@ rows, seen = [], set()
 SOURCES = [
     ("sg_recycling.geojson", "recycling", ["plastic", "paper", "metal", "glass"]),
     ("sg_ewaste.geojson", "ewaste", ["e-waste"]),
-    ("sg_lighting.geojson", "lighting", ["lamps"]),
 ]
 
 for path, kind, streams in SOURCES:

@@ -129,7 +129,7 @@ function LoginForm() {
               autoCorrect="off"
               spellCheck={false}
               autoComplete="username"
-              placeholder="tampines_hari"
+              placeholder="your_username"
               /* 16px minimum, or iOS zooms the viewport on focus. */
               className="min-h-14 flex-1 bg-transparent text-base outline-none"
             />
