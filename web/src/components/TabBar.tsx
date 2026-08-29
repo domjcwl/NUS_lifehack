@@ -10,6 +10,7 @@ const TABS = [
   { href: "/bins", label: "Bins", icon: PinIcon },
   { href: "/chat", label: "Ask", icon: ChatIcon },
   { href: "/news", label: "Learn", icon: BookIcon },
+  { href: "/friends", label: "Pet/Friends", icon: HeartIcon },
   { href: "/impact", label: "Impact", icon: ChartIcon },
 ];
 
@@ -119,6 +120,19 @@ function ChartIcon({ filled }: IconProps) {
     <svg {...box} aria-hidden>
       <path d="M5 20V11M12 20V5M19 20v-6" />
       {filled && <path d="M5 20V11M12 20V5M19 20v-6" strokeWidth={3.4} opacity={0.25} />}
+    </svg>
+  );
+}
+
+function HeartIcon({ filled }: IconProps) {
+  return (
+    <svg {...box} aria-hidden>
+      <path
+        d="M12 20s-7.5-4.8-9.2-8.7C1.3 8.9 3.3 4.5 7.5 4.5c2 0 3.1 1 4.5 2.6 1.4-1.6 2.5-2.6 4.5-2.6 4.2 0 6.2 4.4 4.7 6.8C19.5 15.2 12 20 12 20Z"
+        fill={filled ? "currentColor" : "none"}
+        opacity={filled ? 0.18 : 1}
+      />
+      <path d="M12 20s-7.5-4.8-9.2-8.7C1.3 8.9 3.3 4.5 7.5 4.5c2 0 3.1 1 4.5 2.6 1.4-1.6 2.5-2.6 4.5-2.6 4.2 0 6.2 4.4 4.7 6.8C19.5 15.2 12 20 12 20Z" />
     </svg>
   );
 }

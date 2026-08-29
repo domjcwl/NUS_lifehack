@@ -47,6 +47,24 @@ minute's walk of one of the 12,291 blue bins in NEA's dataset.
 The bear works as **loss aversion, not guilt**. Guilt-and-lecture is exactly the approach
 the brief says has failed, so the copy never moralises.
 
+## App features
+
+### Pet & friends
+- The main Pet/Friends tab shows the user's own pet at the top, centered for a clear mobile-first display.
+- The user sees their polar bear companion, with an XP bar and level badge starting at level 1.
+- Each friend card in the list links to a dedicated friend detail page, where that friend's pet is displayed separately.
+- Clicking a friend keeps the interaction focused and easy to use on a phone, rather than swapping one pet in-place on the same screen.
+
+### Progression and XP
+- Every pet has a level and XP bar that starts from level 1.
+- The bar tracks progress toward the next level and is shown on both the user's pet and friends' pets.
+- The level value is displayed beside the pet name for quick scanning in the list and detail view.
+- This creates a lightweight motivation loop: completion of the app's actions feeds pet growth and progression.
+
+### Demo-friendly behaviour
+- The current implementation uses a simple, visible progression model for the prototype so the pet feels active and rewarding during testing.
+- The feature is intentionally lightweight and can be expanded later to tie XP to real actions such as bin scans, daily streak completion, or user engagement moments.
+
 ## Measurement
 
 Judging criterion 2 asks for a baseline, a metric, and a target. Ours, visible in-app at
