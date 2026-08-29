@@ -267,16 +267,11 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
 
 /* Leaflet, reskinned for night. */
 .leaflet-container { font-family: inherit; background: var(--night-1); }
-.leaflet-tooltip.cluster-label {
-  background: transparent; border: none; box-shadow: none;
-  color: var(--night-0); font-size: 11px; font-weight: 700; padding: 0;
-}
-.leaflet-tooltip.cluster-label::before { display: none; }
-.leaflet-tooltip:not(.cluster-label) {
+.leaflet-tooltip {
   background: var(--night-2); border: 1px solid var(--edge);
   color: var(--frost); box-shadow: none;
 }
-.leaflet-tooltip:not(.cluster-label)::before { border-top-color: var(--night-2); }
+.leaflet-tooltip::before { border-top-color: var(--night-2); }
 .leaflet-control-attribution {
   background: rgba(3, 10, 16, 0.8) !important;
   color: var(--frost-faint) !important;
@@ -285,17 +280,4 @@ h2 { letter-spacing: -0.022em; line-height: 1.14; }
 .leaflet-control-zoom a {
   background: var(--night-2) !important; color: var(--frost) !important;
   border-color: var(--edge) !important;
-}
-
-/* Cluster markers: glowing ice discs with the count baked in. */
-.bin-cluster {
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: radial-gradient(circle at 35% 30%, #dff2fb 0%, #8ecde6 100%);
-  border: 1px solid rgba(3, 16, 26, 0.55);
-  color: #03101a;
-  font-family: var(--font-plex-mono), ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 600;
 }

@@ -242,3 +242,30 @@ rows. Pill buttons keep `px-6`, inputs take `px-4`; those are component padding,
 One deliberate exception, marked in the file: the scan screen's `h1` stays one step down. It is
 a bin address that can run long, and that screen is the one-handed path at the bin — the camera
 button has to stay above the fold.
+
+## A QR per bin, and no cluster bubbles (Sat 29 Aug, ~18:00)
+
+**Every bin has its own QR.** The code is derived from the bin's coordinates and postal code,
+never from its index in `bins.json`. A sticker is printed once and then outlives the data
+behind it: the dataset is rebuilt from NEA's feed, and an index-based code would mean one
+upstream insertion silently repoints every sticker in Singapore at the wrong bin. Verified
+collision-free across all 13,004 — the 102 repeats are the same physical spot listed twice
+by NEA, which is the correct answer for them.
+
+This replaces the one-time scan *instance*. That model assumed a screen could mint a fresh
+slot per scan; a sticker glued to a bin lid cannot. The QR now names the bin, and the replay
+defence is the content hash that already stops the same photo being logged twice. This is
+worth being honest about in the demo: the QR proves someone had the bin's code, not that they
+were standing at it. Rotating codes or a location check would prove presence. We did neither.
+
+Error correction is Q rather than the default M, because the sticker lives outdoors and will
+be rained on and scuffed before anyone points a camera at it. Black on white, never themed —
+a low-contrast QR is one that fails in a dim lift lobby, which is exactly where it is used.
+
+**The cluster bubbles are gone.** Every bin in view is now its own dot, drawn on canvas rather
+than as SVG paths. Two things had to change to make that affordable: the map payload became a
+tuple of `[code, lat, lng, kind]` instead of a full bin object, which took an island-wide pan
+from 196KB to 38KB, and the rest of a bin is now fetched only for the one that gets tapped.
+Above 1,200 in view the response is sampled by an even stride — never the first N, which would
+land in whichever town NEA listed first — and the map says how many of how many it is showing
+rather than quietly displaying a fraction.

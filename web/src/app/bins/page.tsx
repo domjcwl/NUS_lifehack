@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import type { Bin, BinKind } from "@/lib/bins";
@@ -88,6 +90,23 @@ export default function Bins() {
                 {s}
               </span>
             ))}
+          </div>
+
+          {/* The same page the sticker on this bin opens — so the flow can be
+              demonstrated, and used, without a printed QR to hand. */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`/scan/${selected.code}`}
+              className="press btn-primary inline-flex min-h-14 items-center rounded-full px-6 text-body font-medium"
+            >
+              Log at this bin
+            </Link>
+            <Link
+              href={`/bins/${selected.code}/qr`}
+              className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-body"
+            >
+              QR sticker
+            </Link>
           </div>
         </section>
       )}

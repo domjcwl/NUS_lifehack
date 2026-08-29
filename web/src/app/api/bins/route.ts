@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { nearest, pointsInView, type BinKind } from "@/lib/bins";
+import { binsInView, nearest, type BinKind } from "@/lib/bins";
 
 const ALL: BinKind[] = ["recycling", "ewaste"];
 
@@ -19,10 +19,9 @@ export async function GET(req: Request) {
     if (parts.length !== 4 || parts.some(Number.isNaN)) {
       return NextResponse.json({ error: "bbox must be w,s,e,n" }, { status: 400 });
     }
-    const zoom = Number(q.get("zoom") ?? 12);
-    return NextResponse.json({
-      points: pointsInView(parts as [number, number, number, number], zoom, kinds),
-    });
+    /* No zoom parameter any more: without clustering the viewport alone
+       decides what comes back, and zoom told us nothing the bbox did not. */
+    return NextResponse.json(binsInView(parts as [number, number, number, number], kinds));
   }
 
   const lat = Number(q.get("lat"));

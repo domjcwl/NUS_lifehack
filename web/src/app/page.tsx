@@ -22,8 +22,6 @@ interface State {
 export default function Home() {
   const [s, setS] = useState<State | null>(null);
   const [fromHealth, setFromHealth] = useState<number | undefined>(undefined);
-  const [scanUrl, setScanUrl] = useState<string | null>(null);
-  const [minting, setMinting] = useState(false);
 
   useEffect(() => {
     const stashed = sessionStorage.getItem("floe:fromHealth");
@@ -33,20 +31,6 @@ export default function Home() {
     }
     fetch("/api/log").then((r) => r.json()).then(setS);
   }, []);
-
-  async function simulateScan() {
-    setMinting(true);
-    try {
-      const inst = await fetch("/api/log", {
-        method: "PUT",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ binId: "tpe-826a" }),
-      }).then((r) => r.json());
-      setScanUrl(`/scan/${inst.id}`);
-    } finally {
-      setMinting(false);
-    }
-  }
 
   if (!s) {
     return (
@@ -138,22 +122,15 @@ export default function Home() {
         style={{ bottom: "calc(var(--tabbar-h) + var(--safe-b) + 0.75rem)" }}
       >
         <div className="mx-auto max-w-lg">
-          {scanUrl ? (
-            <Link
-              href={scanUrl}
-              className="press btn-primary flex min-h-14 items-center justify-center rounded-full px-6 text-body"
-            >
-              Open the scan →
-            </Link>
-          ) : (
-            <button
-              onClick={simulateScan}
-              disabled={minting}
-              className="press btn-primary flex min-h-14 w-full items-center justify-center rounded-full px-6 text-body disabled:opacity-60"
-            >
-              {minting ? "Opening…" : "Scan the code at Blk 826A"}
-            </button>
-          )}
+          {/* The real entry point is the QR on the bin itself. This is the
+              path for someone already holding their phone: find the bin, and
+              its page is the same page the sticker opens. */}
+          <Link
+            href="/bins"
+            className="press btn-primary flex min-h-14 w-full items-center justify-center rounded-full px-6 text-body font-medium"
+          >
+            Find a bin near you
+          </Link>
         </div>
       </div>
     </>

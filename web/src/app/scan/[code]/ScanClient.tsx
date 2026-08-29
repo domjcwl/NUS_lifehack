@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import type { Bin } from "@/lib/bins";
 import { motion, useReducedMotion } from "motion/react";
-import { use, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type Verdict = {
   verified: boolean;
@@ -17,8 +18,7 @@ type Verdict = {
 
 type Phase = "capture" | "checking" | "done";
 
-export default function Scan({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ScanClient({ bin }: { bin: Bin }) {
   const reduce = useReducedMotion();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            instanceId: id,
+            binCode: bin.code,
             item: v.item,
             confidence: v.confidence,
             reason: v.reason,
@@ -105,9 +105,15 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
               dynamic bin address that can run long, and this screen is the
               one-handed path at the bin — the camera button has to stay
               above the fold. */}
-          <h1 className="mt-2 text-head">Blk 826A Tampines St 81</h1>
+          <h1 className="mt-2 text-head">{bin.name}</h1>
           <p className="mt-1 text-body text-[var(--frost-dim)]">
-            Hold the item at the blue bin and take one photo. This slot works once.
+            {bin.kind === "ewaste"
+              ? "Hold the item at the e-waste bin and take one photo."
+              : "Hold the item at the blue bin and take one photo."}{" "}
+            The same photo cannot be counted twice.
+          </p>
+          <p className="mono mt-2 text-label text-[var(--frost-faint)]">
+            {bin.code} · S{bin.postal}
           </p>
         </div>
 
@@ -163,7 +169,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
                   {verdict.stubbed && (
                     <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-micro text-[var(--frost-dim)]">
                       Demo mode: no API key on this machine, so the photo was not actually
-                      checked. Set ANTHROPIC_API_KEY to run real validation.
+                      checked. Set OPENAI_API_KEY to run real validation.
                     </p>
                   )}
 

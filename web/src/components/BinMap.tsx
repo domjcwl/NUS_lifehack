@@ -1,29 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
-import L from "leaflet";
+import { CircleMarker, MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import clsx from "clsx";
-import type { Bin, BinKind, MapPoint } from "@/lib/bins";
+import type { Bin, BinKind, MapBin } from "@/lib/bins";
 import "leaflet/dist/leaflet.css";
 
 const SG_CENTRE: [number, number] = [1.3521, 103.8198];
-
-const iconCache = new Map<number, L.DivIcon>();
-
-function clusterIcon(count: number): L.DivIcon {
-  const cached = iconCache.get(count);
-  if (cached) return cached;
-  const size = Math.round(Math.min(54, 26 + Math.log2(count) * 5));
-  const icon = L.divIcon({
-    html: `<span>${count}</span>`,
-    className: "bin-cluster",
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-  iconCache.set(count, icon);
-  return icon;
-}
 
 const KIND_COLOUR: Record<BinKind, string> = {
   recycling: "#3ad9a6",
@@ -46,9 +29,27 @@ export default function BinMap({
   kinds: BinKind[];
   onToggleKind: (k: BinKind) => void;
 }) {
-  const [points, setPoints] = useState<MapPoint[]>([]);
+  const [view, setView] = useState<{ points: MapBin[]; total: number; capped: boolean }>({
+    points: [],
+    total: 0,
+    capped: false,
+  });
   const [me, setMe] = useState<[number, number] | null>(null);
   const toggle = onToggleKind;
+
+  /* The map payload carries no names, so the tapped bin is fetched in full. It
+     is one small request for the one bin someone actually chose. */
+  const openBin = useCallback(
+    async (code: string) => {
+      try {
+        const d = await fetch(`/api/bins/${code}`).then((r) => r.json());
+        if (d.bin) onSelect?.(d.bin as Bin);
+      } catch {
+        /* A dropped lookup should leave the map alone, not blank the sheet. */
+      }
+    },
+    [onSelect],
+  );
 
   return (
     <div className="space-y-3">
@@ -81,6 +82,7 @@ export default function BinMap({
           minZoom={10}
           maxZoom={18}
           scrollWheelZoom
+          preferCanvas
           style={{ height: "100%", width: "100%", background: "var(--night-1)" }}
           /* Singapore only — panning to open ocean helps nobody. */
           maxBounds={[
@@ -94,33 +96,26 @@ export default function BinMap({
             attribution='Map &copy; <a href="https://www.onemap.gov.sg/">OneMap</a> &copy; Singapore Land Authority'
             maxZoom={18}
           />
-          <Loader kinds={kinds} onPoints={setPoints} />
+          <Loader kinds={kinds} onView={setView} />
           <Locate onFound={setMe} />
 
-          {points.map((p) =>
-            p.cluster ? (
-              <Marker
-                key={`c${p.lat},${p.lng},${p.count}`}
-                position={[p.lat, p.lng]}
-                icon={clusterIcon(p.count)}
-              />
-            ) : (
-              <CircleMarker
-                key={`b${p.bin.id}`}
-                center={[p.lat, p.lng]}
-                radius={7}
-                eventHandlers={{ click: () => onSelect?.(p.bin) }}
-                pathOptions={{
-                  color: "#03101a",
-                  weight: 1.5,
-                  fillColor: KIND_COLOUR[p.bin.kind],
-                  fillOpacity: 0.95,
-                }}
-              >
-                <Tooltip>{p.bin.name}</Tooltip>
-              </CircleMarker>
-            ),
-          )}
+          {view.points.map(([code, lat, lng, kind]) => (
+            <CircleMarker
+              key={code}
+              center={[lat, lng]}
+              /* Small enough that a dense estate reads as texture rather than
+                 one blob, big enough to stay a comfortable tap target with the
+                 slack Leaflet allows around a path. */
+              radius={6}
+              eventHandlers={{ click: () => void openBin(code) }}
+              pathOptions={{
+                color: "#03101a",
+                weight: 1.25,
+                fillColor: kind === 1 ? KIND_COLOUR.ewaste : KIND_COLOUR.recycling,
+                fillOpacity: 0.95,
+              }}
+            />
+          ))}
 
           {me && (
             <CircleMarker
@@ -133,14 +128,25 @@ export default function BinMap({
       </div>
 
       <p className="text-micro text-[var(--frost-dim)]">
-        Circles group nearby points — zoom in to split them. Data: NEA via data.gov.sg.
+        {view.capped
+          ? `Showing ${view.points.length.toLocaleString()} of ${view.total.toLocaleString()} bins in view — zoom in for all of them. `
+          : view.total > 0
+            ? `${view.total.toLocaleString()} ${view.total === 1 ? "bin" : "bins"} in view. `
+            : ""}
+        Data: NEA via data.gov.sg.
       </p>
     </div>
   );
 }
 
 /** Fetches only what the current viewport needs, debounced against panning. */
-function Loader({ kinds, onPoints }: { kinds: BinKind[]; onPoints: (p: MapPoint[]) => void }) {
+function Loader({
+  kinds,
+  onView,
+}: {
+  kinds: BinKind[];
+  onView: (v: { points: MapBin[]; total: number; capped: boolean }) => void;
+}) {
   const map = useMap();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kindKey = useMemo(() => [...kinds].sort().join(","), [kinds]);
@@ -148,12 +154,12 @@ function Loader({ kinds, onPoints }: { kinds: BinKind[]; onPoints: (p: MapPoint[
   const load = useCallback(() => {
     const b = map.getBounds();
     const bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(",");
-    const url = `/api/bins?bbox=${bbox}&zoom=${map.getZoom()}&types=${kindKey}`;
+    const url = `/api/bins?bbox=${bbox}&types=${kindKey}`;
     fetch(url)
       .then((r) => r.json())
-      .then((d) => onPoints(d.points ?? []))
-      .catch(() => onPoints([]));
-  }, [map, kindKey, onPoints]);
+      .then((d) => onView({ points: d.points ?? [], total: d.total ?? 0, capped: !!d.capped }))
+      .catch(() => onView({ points: [], total: 0, capped: false }));
+  }, [map, kindKey, onView]);
 
   const schedule = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
@@ -164,8 +170,8 @@ function Loader({ kinds, onPoints }: { kinds: BinKind[]; onPoints: (p: MapPoint[
 
   useEffect(() => {
     if (kindKey) load();
-    else onPoints([]);
-  }, [kindKey, load, onPoints]);
+    else onView({ points: [], total: 0, capped: false });
+  }, [kindKey, load, onView]);
 
   return null;
 }
