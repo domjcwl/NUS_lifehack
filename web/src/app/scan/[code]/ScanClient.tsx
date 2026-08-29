@@ -236,7 +236,9 @@ export default function ScanClient({ bin }: { bin: Bin }) {
         ref={fileRef}
         type="file"
         accept="image/*"
-        capture="user"
+        /* "environment" is the REAR camera. Not "user" — that is the selfie
+           camera, which cannot photograph a bin you are standing at. */
+        capture="environment"
         onChange={onPick}
         className="hidden"
       />

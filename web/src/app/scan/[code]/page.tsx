@@ -7,7 +7,7 @@ import ScanClient from "./ScanClient";
  * What a printed QR opens.
  *
  * The bin is resolved here, on the server, and handed down. The alternative —
- * looking it up in the client — would ship all 13,004 bins to a phone to render
+ * looking it up in the client — would ship all 12,902 bins to a phone to render
  * one address.
  */
 export default async function Scan({ params }: { params: Promise<{ code: string }> }) {

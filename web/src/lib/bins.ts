@@ -66,7 +66,7 @@ function codeFor(postal: string, lat: number, lng: number): string {
 }
 
 export const BINS: Bin[] = (() => {
-  const seen = new Set<string>();
+  const seen = new Map<string, Bin>();
   const bins: Bin[] = [];
 
   for (const [i, r] of (raw as RawBin[]).entries()) {
@@ -81,33 +81,30 @@ export const BINS: Bin[] = (() => {
       lng: r.x,
     };
 
-    if (seen.has(bin.code)) {
-      /* Same spot, same postal: genuinely the same physical location listed twice
-         upstream. Keep the first and let both resolve to it to avoid duplicate map marks
-         and broken selection states. */
+    const clash = seen.get(bin.code);
+    if (clash) {
+      /* Same spot, same postal: genuinely the same physical location listed
+         twice upstream. Keep the first, so the map draws one mark per place.
+
+         Different coordinates under one code would instead mean two real places
+         sharing a sticker — the thing this whole scheme must never do. Dropping
+         that silently is how it would go unnoticed, so it is still shouted
+         about here rather than in a corridor. */
+      if (clash.lat !== bin.lat || clash.lng !== bin.lng) {
+        console.warn(`[bins] code collision ${bin.code}: "${clash.name}" vs "${bin.name}"`);
+      }
       continue;
     }
 
-    seen.add(bin.code);
+    seen.set(bin.code, bin);
     bins.push(bin);
   }
 
   return bins;
 })();
 
-/* Built once. A collision would mean two bins sharing a sticker, so it is
-   worth knowing about at boot rather than in a corridor. */
-const BY_CODE = new Map<string, Bin>();
-for (const b of BINS) {
-  const clash = BY_CODE.get(b.code);
-  if (clash) {
-    if (clash.lat !== b.lat || clash.lng !== b.lng) {
-      console.warn(`[bins] code collision ${b.code}: "${clash.name}" vs "${b.name}"`);
-    }
-    continue;
-  }
-  BY_CODE.set(b.code, b);
-}
+/* BINS is unique by code by construction above, so this is a plain index. */
+const BY_CODE = new Map<string, Bin>(BINS.map((b) => [b.code, b]));
 
 export function binByCode(code: string): Bin | null {
   return BY_CODE.get(code.trim().toUpperCase()) ?? null;
@@ -121,7 +118,7 @@ export function binByCode(code: string): Bin | null {
  * what is on screen, up to `limit`, and is told the true total so it can say so
  * rather than quietly showing a fraction.
  *
- * A linear scan over 13,004 rows is well under a millisecond and avoids keeping
+ * A linear scan over 12,902 rows is well under a millisecond and avoids keeping
  * a spatial index in memory per filter combination.
  */
 /**
