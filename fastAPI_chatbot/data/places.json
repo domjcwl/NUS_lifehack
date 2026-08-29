@@ -5,5 +5,19 @@
   "longitude": 103.93409,
   "name": "Blk 826A Tampines Street 81",
   "source": "bins"
+ },
+ "787056": {
+  "address": "Singapore",
+  "latitude": 1.2899175,
+  "longitude": 103.8519072,
+  "name": "Singapore",
+  "source": "osm"
+ },
+ "raffles hall": {
+  "address": "Raffles Hall, one-north, Queenstown, Central Region, Singapore",
+  "latitude": 1.3001523,
+  "longitude": 103.7734127,
+  "name": "Raffles Hall",
+  "source": "osm"
  }
 }
