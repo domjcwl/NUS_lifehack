@@ -155,6 +155,23 @@ module to compile, which matters on Windows. The database is a single file at
 database. Swapping SQLite for the real backend means reimplementing that one
 module's exports and touching nothing else.
 
+### Profile
+
+`/profile` shows the record and lets you rename the account. It is reached from
+the friends screen rather than a tab — six tabs already sits at the limit of
+what a person can hold, and a seventh would cost more than it adds.
+
+Stats are behavioural rather than invented: current and longest streak, days
+active against days since the first action, this week against last week, weekly
+rate, and a breakdown of what you bin. There is no fabricated CO₂ figure — we do
+not measure the mass of what goes in the bin, so we do not claim it.
+
+**Renaming frees the old handle immediately.** Friendships key on the account id,
+so they survive a rename and the friend list updates — but someone could then
+take the vacated username and be mistaken for its previous owner. A real build
+would reserve retired handles for a cooling-off period. Called out here because
+it is a deliberate omission, not an oversight.
+
 ### Security — read this before judging it
 
 **The PIN is prototype-grade, and we are not claiming otherwise.** PINs are

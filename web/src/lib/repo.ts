@@ -128,6 +128,32 @@ export function claimAccount(
   return { ok: true, user: getUser(userId)! };
 }
 
+/** Rename an existing account. Friendships key on id, so they survive. */
+export function updateProfile(
+  userId: string,
+  username: string,
+  displayName: string,
+): { ok: true; user: User } | { ok: false; error: string } {
+  const lower = username.trim().toLowerCase();
+  const current = getUser(userId);
+  if (!current) return { ok: false, error: "No such account." };
+  if (current.isGuest) return { ok: false, error: "Claim an account first." };
+
+  if (lower !== current.username) {
+    const problem = validateUsername(lower);
+    if (problem) return { ok: false, error: problem };
+  }
+
+  try {
+    db()
+      .prepare("UPDATE users SET username = ?, username_lower = ?, display_name = ? WHERE id = ?")
+      .run(lower, lower, displayName.trim() || lower, userId);
+  } catch {
+    return { ok: false, error: "That username is taken." };
+  }
+  return { ok: true, user: getUser(userId)! };
+}
+
 export function verifyLogin(username: string, pin: string): User | null {
   const r = db()
     .prepare("SELECT * FROM users WHERE username_lower = ?")

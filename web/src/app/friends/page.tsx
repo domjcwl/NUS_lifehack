@@ -85,13 +85,6 @@ export default function FriendsPage() {
     load();
   }
 
-  async function signOut() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setQuery("");
-    setHits(null);
-    load();
-  }
-
   return (
     <div className="space-y-8">
       {/* Your own bear leads — friends are the comparison, not the subject. */}
@@ -100,9 +93,11 @@ export default function FriendsPage() {
           <Bear mood={mine?.mood ?? "happy"} health={mine?.health ?? 100} />
           <div className="flex items-end justify-between gap-3 px-5 pb-5 pt-4">
             <div>
-              <h1 className="text-[1.6rem]">
-                {me?.isGuest ? "Your bear" : `@${me?.username}`}
-              </h1>
+              <Link href="/profile" className="press inline-block">
+                <h1 className="text-[1.6rem] underline decoration-[var(--edge-bright)] decoration-1 underline-offset-4">
+                  {me?.isGuest ? "Your bear" : `@${me?.username}`}
+                </h1>
+              </Link>
               <p className="mt-1 text-[0.92rem] text-[var(--frost-dim)]">
                 {mine ? BEAR_COPY[mine.mood].title : "Loading…"}
               </p>
@@ -221,14 +216,12 @@ export default function FriendsPage() {
         )}
       </section>
 
-      {me && !me.isGuest && (
-        <button
-          onClick={signOut}
-          className="press min-h-11 text-[0.88rem] text-[var(--frost-faint)]"
-        >
-          Sign out of @{me.username}
-        </button>
-      )}
+      <Link
+        href="/profile"
+        className="press hoverable inline-flex min-h-14 items-center rounded-full border border-[var(--edge)] px-6 text-[0.95rem]"
+      >
+        Your profile and stats
+      </Link>
 
       <AuthSheet
         open={sheet !== null}
