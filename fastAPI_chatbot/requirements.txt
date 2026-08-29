@@ -1,0 +1,16 @@
+# Eight runtime dependencies. Deliberately no langchain-openai: LangGraph does not
+# require a LangChain chat model, and calling the openai SDK directly in one node
+# costs five lines and removes a whole dependency tree.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic-settings>=2.4
+langgraph>=0.2
+openai>=1.50
+python-dotenv>=1.0
+
+# Tests
+pytest>=8.0
+httpx>=0.27
+
+# Ingestion only (scripts/ingest.py). Not imported by the service.
+pypdf>=5.0
