@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { actionsFor, addAction, createInstance, getInstance, markInstanceUsed } from "@/lib/store";
 import { bearHealth, bearMood, streakFrom } from "@/lib/bear";
+import { actionsFor, addAction, createInstance, getInstance, markInstanceUsed } from "@/lib/repo";
+import { currentUser } from "@/lib/session";
 
-const USER = "demo";
-
-/** GET /api/log — current bear + streak state. */
+/** GET /api/log — the signed-in (or guest) user's bear and streak state. */
 export async function GET() {
-  const acts = actionsFor(USER);
+  const user = await currentUser();
+  const acts = actionsFor(user.id);
   const last = acts[0]?.at ?? null;
   return NextResponse.json({
+    user: { id: user.id, username: user.username, displayName: user.displayName, isGuest: user.isGuest },
     streak: streakFrom(acts.map((a) => a.at)),
     mood: bearMood(last),
     health: bearHealth(last),
@@ -27,7 +28,8 @@ export async function POST(req: Request) {
     reason?: string;
   };
 
-  const inst = body.instanceId ? getInstance(body.instanceId) : undefined;
+  const user = await currentUser();
+  const inst = body.instanceId ? getInstance(body.instanceId) : null;
   if (body.instanceId && !inst) {
     return NextResponse.json({ error: "That scan link is not valid." }, { status: 404 });
   }
@@ -36,8 +38,7 @@ export async function POST(req: Request) {
   }
 
   addAction({
-    id: Math.random().toString(36).slice(2, 10),
-    userId: USER,
+    userId: user.id,
     at: Date.now(),
     binId: inst?.binId ?? null,
     item: body.item ?? "unknown",
@@ -45,9 +46,9 @@ export async function POST(req: Request) {
     confidence: body.confidence ?? 0,
     reason: body.reason ?? "",
   });
-  if (inst) markInstanceUsed(inst.id, USER);
+  if (inst) markInstanceUsed(inst.id, user.id);
 
-  const acts = actionsFor(USER);
+  const acts = actionsFor(user.id);
   const last = acts[0]?.at ?? null;
   return NextResponse.json({
     streak: streakFrom(acts.map((a) => a.at)),

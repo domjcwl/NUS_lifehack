@@ -1,64 +1,118 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { FRIENDS } from "@/lib/friends";
+import { use, useEffect, useState } from "react";
+import Bear from "@/components/Bear";
+import { BEAR_COPY } from "@/lib/bear";
+import type { BearMood } from "@/lib/types";
 
-export default async function FriendPetPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const friend = FRIENDS.find((item) => item.id === id);
+interface FriendState {
+  id: string;
+  username: string | null;
+  displayName: string;
+  streak: number;
+  total: number;
+  mood: BearMood;
+  health: number;
+  lastActionAt: number | null;
+}
 
-  if (!friend) {
-    notFound();
+export default function FriendPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const [friend, setFriend] = useState<FriendState | null | "missing">(null);
+
+  useEffect(() => {
+    fetch("/api/friends")
+      .then((r) => r.json())
+      .then((d: { friends: FriendState[] }) => {
+        setFriend(d.friends.find((f) => f.id === id) ?? "missing");
+      })
+      .catch(() => setFriend("missing"));
+  }, [id]);
+
+  if (friend === null) {
+    return <div className="card card-lg h-80 animate-pulse opacity-50" />;
   }
 
-  const xpPercent = (friend.xp / friend.xpMax) * 100;
+  if (friend === "missing") {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-[1.6rem]">Not one of your friends</h1>
+        <p className="text-[0.95rem] text-[var(--frost-dim)]">
+          You can only see the floe of someone you have added.
+        </p>
+        <Link
+          href="/friends"
+          className="press btn-primary inline-flex min-h-14 items-center rounded-full px-6 text-[0.95rem]"
+        >
+          Back to friends
+        </Link>
+      </div>
+    );
+  }
+
+  const copy = BEAR_COPY[friend.mood];
+  const days =
+    friend.lastActionAt === null
+      ? null
+      : Math.floor((Date.now() - friend.lastActionAt) / 86_400_000);
 
   return (
-    <div className="stagger space-y-5">
-      <header className="flex items-center justify-between gap-3">
-        <div>
-          <p className="mono text-[10px] text-[var(--ink-soft)]">Friend</p>
-          <h1 className="mt-1 text-[1.7rem] font-semibold">{friend.name}</h1>
-        </div>
-        <Link href="/friends" className="press rounded-full bg-[var(--deep)] px-3 py-2 text-sm text-white">
-          Back
-        </Link>
-      </header>
+    <div className="stagger space-y-6">
+      <Link href="/friends" className="press mono inline-block text-[10px] text-[var(--frost-dim)]">
+        Back to friends
+      </Link>
 
-      <section className="card card-lg px-5 py-5 text-center">
-        <div
-          className="mx-auto flex h-36 w-36 items-center justify-center rounded-[2rem] border border-white/60 shadow-inner shadow-white/40"
-          style={{
-            background: `radial-gradient(circle at 30% 25%, rgba(255,255,255,0.9), ${friend.color} 26%, ${friend.accent} 100%)`,
-          }}
-        >
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.7rem] bg-white/20 backdrop-blur-sm">
-            <div className="absolute left-3 top-4 h-3 w-3 rounded-full bg-white/90" />
-            <div className="absolute right-3 top-4 h-3 w-3 rounded-full bg-white/90" />
-            <div className="absolute bottom-4 h-3 w-9 rounded-full border-2 border-white/90" />
-            <div className="h-14 w-14 rounded-[1.3rem] bg-white/15" />
-          </div>
+      <section className="card card-lg overflow-hidden">
+        <Bear mood={friend.mood} health={friend.health} />
+        <div className="px-5 pb-5 pt-4">
+          <h1 className="text-[2rem]">@{friend.username}</h1>
+          <p className="mt-1.5 text-[0.98rem] text-[var(--frost-dim)]">{copy.title}</p>
         </div>
-
-        <div className="mt-4 flex items-center justify-center gap-2">
-          <h2 className="text-xl font-semibold">{friend.petName}</h2>
-          <span className="rounded-full bg-[var(--sea)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--sea)]">
-            Lv {friend.level}
-          </span>
+        <div className="grid grid-cols-3 border-t border-[var(--edge)]">
+          <Cell label="Streak" value={String(friend.streak)} unit="days" accent />
+          <Cell label="Verified" value={String(friend.total)} unit="actions" divider />
+          <Cell
+            label="Last seen"
+            value={days === null ? "—" : days === 0 ? "today" : `${days}d`}
+            unit={days === null ? "never" : "ago"}
+            divider
+          />
         </div>
-
-        <div className="mx-auto mt-3 w-full max-w-xs">
-          <div className="flex items-center justify-between text-[10px] font-medium text-[var(--ink-soft)]">
-            <span>XP</span>
-            <span>{friend.xp}/{friend.xpMax}</span>
-          </div>
-          <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-[var(--ice-1)]">
-            <div className="h-full rounded-full bg-[var(--sea)]" style={{ width: `${xpPercent}%` }} />
-          </div>
-        </div>
-
-        <p className="mt-3 text-sm text-[var(--ink-soft)]">{friend.petMood} · {friend.status}</p>
-        <p className="mt-3 text-sm text-[var(--ink-soft)]">{friend.trait}</p>
       </section>
+
+      <p className="max-w-[40ch] text-[0.95rem] text-[var(--frost-dim)]">
+        You can see their floe, not their bins. Nothing about where they live or what they threw
+        away is shared — only whether the ice is holding.
+      </p>
+    </div>
+  );
+}
+
+function Cell({
+  label,
+  value,
+  unit,
+  accent,
+  divider,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  accent?: boolean;
+  divider?: boolean;
+}) {
+  return (
+    <div className={`px-3 py-4 ${divider ? "border-l border-[var(--edge)]" : ""}`}>
+      <p
+        className={`tnum text-[1.6rem] leading-none font-bold ${
+          accent ? "text-[var(--coral)]" : "text-[var(--frost)]"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mono mt-1.5 text-[9px] text-[var(--frost-faint)]">{label}</p>
+      <p className="mt-0.5 text-[10px] text-[var(--frost-faint)]">{unit}</p>
     </div>
   );
 }

@@ -126,6 +126,47 @@ nearby would have been designing against our own evidence. The blue bin at the f
 HDB block is the densest point-of-decision surface in Singapore, so that is where Floe
 lives. E-waste points *do* cover campus, which is a natural second phase.
 
+## Accounts and friends
+
+**Guest first.** Opening the app mints a guest identity with a real session and a
+short seeded history, so the mechanic works before anyone signs up. Claiming a
+username converts that guest row **in place**, so the streak built as a guest
+carries over rather than resetting — which is the whole reason the flow is
+guest-first rather than login-first.
+
+- **Unique usernames**, 3–20 chars, `[a-z0-9_]`, checked live as you type and
+  enforced by a `UNIQUE` constraint rather than by the check alone.
+- **Find people in-app** by username or display name at `/friends`.
+- Adding a friend is **mutual immediately** — no pending-request flow. A
+  hackathon simplification, deliberate and noted here.
+- A friend row carries their **live bear state** (streak, mood, floe health).
+  You can see whether their ice is holding; you cannot see their bins, their
+  location, or what they threw away.
+- Guests can use everything except friends, and are prompted to claim a
+  username at the point they try.
+
+### Storage
+
+SQLite via **`node:sqlite`**, which ships in Node 22+ — so there is no native
+module to compile, which matters on Windows. The database is a single file at
+`web/data/floe.db`, git-ignored because it holds user data.
+
+**Every query lives in `src/lib/repo.ts`.** Nothing else in the app talks to the
+database. Swapping SQLite for the real backend means reimplementing that one
+module's exports and touching nothing else.
+
+### Security — read this before judging it
+
+**The PIN is prototype-grade, and we are not claiming otherwise.** PINs are
+salted and hashed with scrypt, sessions are opaque random tokens in an
+`httpOnly`, `sameSite=lax` cookie, and the login error is identical for a wrong
+username and a wrong PIN so the form cannot be used to enumerate accounts.
+
+What it is **not**: there is no rate limiting, no lockout, no password reset, no
+email verification, and a 4-digit PIN has 10,000 combinations. It is the right
+amount of auth for a 24-hour prototype where nothing of value is protected, and
+it is the wrong amount for anything real.
+
 ## Project layout
 
 ```
