@@ -55,3 +55,88 @@ RISKIEST ASSUMPTION: … → test by <time>
 OWNERS: dom=… inferno=… zereth=… hari=…
 STACK: …
 ```
+
+---
+
+# LOCKED SPEC — Sat 11:20
+
+### Sat 11:15 — Brief: Ecovolt, "Small Green Habits"
+Only brief considered; team topic was sustainability and this is the sustainability track.
+Full text: `docs/problem-statement.md`.
+
+### Sat 11:20 — Domain: WASTE / RECYCLING (not energy)
+**Why:** the feature set we designed (photo at the bin, AI validation, bin locator) is built for
+waste. The brief's hard constraint is *one concrete behaviour*, and splitting across energy and
+waste would cost points on behaviour-change and measurability.
+**Considered and rejected:** energy / idle plug load — closer to Ecovolt's own product, but it
+kills the bin-locator feature and "photograph a dark room" is a harder validation problem.
+
+### Sat 11:20 — Scope: all five features, sequenced
+Team decision to keep the full feature set. Sequenced so the core loop is demo-ready early and
+the rest layers on top — see build order below. **Non-negotiable: the P0 loop must be usable end
+to end before anyone starts P2.**
+
+---
+
+## The spec
+
+**Audience:** NUS students in hostels / on campus.
+
+**Behaviour we are shifting (exactly one):**
+> Correctly sorting a recyclable item into the right bin, instead of dropping it in general waste.
+
+**Problem statement:**
+> For NUS students, who know they should recycle but walk past the "please recycle" poster without
+> acting, we build a game that turns each correct recycling action into a 10-second, verified,
+> social moment — so the intention becomes a repeated habit.
+
+**Behaviour-change mechanics (deliberate, named):**
+| Mechanic | How it shows up |
+|---|---|
+| **Point-of-decision prompt** | QR code at the bin creates a unique instance — the intervention is where and when the decision happens, not in an app you must remember to open |
+| **Loss aversion** | The polar bear degrades if you don't act. You are protecting something, not earning a badge |
+| **Commitment + streak** | Visible run you don't want to break |
+| **Verification** | AI validates the photo, so the action is real rather than self-declared |
+| **Social proof** | Floor/hostel-level comparison |
+
+**Framing rule:** the polar bear works as *loss aversion*, not as guilt. Copy never lectures.
+Guilt-and-lecture is precisely what the brief says has failed.
+
+## Measurement story (judging criterion 2)
+
+- **Metric:** verified recycling actions per user per week. *Verified* is load-bearing — AI
+  validation is what makes this trustworthy rather than self-reported.
+- **Baseline:** first 7 days run as a logging-only onboarding week, before the bear is introduced.
+  Plus a self-reported "how many times last week?" at signup.
+- **Target:** +40% verified actions/user/week by week 4, and **≥50% of users still active at day
+  30**.
+- **Control arm:** half the cohort gets logging only, half gets the bear. We cannot run a 30-day
+  study in 24h, but the study is *designed* and the app is instrumented for it — that is the
+  honest answer to "how do you know it is your mechanic and not novelty?"
+- **Report vanity vs behaviour metrics separately.** Signups, app opens and photo counts are
+  vanity. The Impact screen shows behaviour metrics only.
+
+**Deliverable:** an **Impact screen** seeded with 30 days of simulated cohort data — baseline
+week, intervention, both arms diverging, retention curve. Explicitly labelled as simulated.
+The brief permits mocked data; it does not permit pretending mocked data is real.
+
+## Build order
+
+| Pri | Feature | Done when |
+|---|---|---|
+| **P0** | QR → unique instance → camera → AI validation → polar bear state → streak | A stranger can scan, photograph, and see the bear respond. **This is the demo.** |
+| **P1** | Impact screen with seeded cohort data (baseline / target / control arm / retention) | Judge can see the measurement story on screen |
+| **P2** | Nearest-bin locator | Friction remover; real map, real campus bins |
+| **P3** | Chatbot for waste/recycling questions | "Can I recycle this?" at the point of decision |
+| **P4** | Environmental news feed | Lowest priority — informational, and the brief says information is not the problem |
+
+**Feature freeze 03:00. Hands off features 09:00 Sunday** — then `submission-checklist`.
+
+## Stack
+
+Next.js (App Router) + TypeScript + Tailwind, in `web/`. Single repo, API routes for the AI
+validation and chatbot, deploys as one unit. Chosen because the prototype must be *usable by a
+real person on a phone* — a web app opened from a QR code needs no install.
+
+## Owners
+> Fill in: dom = · inferno = · zereth = · hari =
