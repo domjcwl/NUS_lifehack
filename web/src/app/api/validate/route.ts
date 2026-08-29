@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -76,13 +77,23 @@ function stub() {
   };
 }
 
+/**
+ * Identifies the exact photo, so the same one cannot be logged twice. It is a
+ * content hash, not a perceptual one: a re-crop defeats it. Enough to stop the
+ * lazy path of re-submitting one saved image, not a serious anti-fraud measure,
+ * and the README says so.
+ */
+function hashOf(dataUrl: string): string {
+  return createHash("sha256").update(dataUrl).digest("hex").slice(0, 32);
+}
+
 export async function POST(req: Request) {
   try {
     const { image } = (await req.json()) as { image?: string };
     if (!image) {
       return NextResponse.json({ error: "No image supplied." }, { status: 400 });
     }
-    if (!client) return NextResponse.json(stub());
+    if (!client) return NextResponse.json({ ...stub(), mediaHash: hashOf(image) });
 
     if (!/^data:image\/(?:jpeg|png|webp);base64,/.test(image)) {
       return NextResponse.json({ error: "Unsupported image format." }, { status: 400 });
@@ -118,7 +129,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Empty response from validator." }, { status: 502 });
     }
 
-    return NextResponse.json({ ...JSON.parse(text), stubbed: false });
+    return NextResponse.json({ ...JSON.parse(text), stubbed: false, mediaHash: hashOf(image) });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Validation failed.";
     return NextResponse.json({ error: message }, { status: 500 });

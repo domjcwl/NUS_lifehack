@@ -22,7 +22,10 @@ interface Stats {
 
 interface Payload {
   user: Me & { createdAt: number };
-  friendCount: number;
+  groupCount: number;
+  xp: number;
+  level: number;
+  stage: string;
   mood: BearMood;
   health: number;
   stats: Stats;
@@ -75,7 +78,7 @@ export default function Profile() {
 
   if (!data) return <div className="card card-lg h-96 animate-pulse opacity-50" />;
 
-  const { user, stats, friendCount } = data;
+  const { user, stats } = data;
   const since = stats.firstActionAt
     ? new Date(stats.firstActionAt).toLocaleDateString("en-SG", { day: "numeric", month: "long" })
     : null;
@@ -85,7 +88,7 @@ export default function Profile() {
     <div className="space-y-9">
       <section className="rise">
         <div className="card card-lg overflow-hidden">
-          <Bear mood={data.mood} health={data.health} />
+          <Bear mood={data.mood} health={data.health} level={data.level} />
           <div className="px-5 pb-5 pt-4">
             {editing ? (
               <div>
@@ -199,7 +202,9 @@ export default function Profile() {
           <Row label="Longest streak" value={`${stats.longestStreak} ${stats.longestStreak === 1 ? "day" : "days"}`} />
           <Row label="This week" value={String(stats.thisWeek)} note={trendNote(trend)} />
           <Row label="Days active" value={`${stats.activeDays} of ${stats.daysSinceStart}`} />
-          <Row label="Friends" value={String(friendCount)} />
+          <Row label="Level" value={`${data.level} · ${data.stage}`} />
+          <Row label="Total XP" value={String(data.xp)} />
+          <Row label="Groups" value={String(data.groupCount)} />
         </dl>
       </section>
 
@@ -242,10 +247,10 @@ export default function Profile() {
 
       <section className="rise flex flex-wrap gap-2.5 border-t border-[var(--edge)] pt-7">
         <Link
-          href="/friends"
+          href="/group"
           className="press hoverable min-h-14 rounded-full border border-[var(--edge)] px-6 text-[0.95rem] leading-[3.5rem]"
         >
-          Friends
+          Group
         </Link>
         {!user.isGuest && (
           <button

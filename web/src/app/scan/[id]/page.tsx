@@ -12,6 +12,7 @@ type Verdict = {
   confidence: number;
   reason: string;
   stubbed?: boolean;
+  mediaHash?: string;
 };
 
 type Phase = "capture" | "checking" | "done";
@@ -24,6 +25,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
   const [phase, setPhase] = useState<Phase>("capture");
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [streak, setStreak] = useState<number | null>(null);
+  const [gained, setGained] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -60,7 +62,7 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
         } catch {
           /* A missing handoff only costs the animation, never the log. */
         }
-        const logged = await fetch("/api/log", {
+        const res = await fetch("/api/log", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -68,9 +70,14 @@ export default function Scan({ params }: { params: Promise<{ id: string }> }) {
             item: v.item,
             confidence: v.confidence,
             reason: v.reason,
+            mediaHash: v.mediaHash,
+            correctlySorted: v.correctlySorted,
           }),
-        }).then((r) => r.json());
+        });
+        const logged = await res.json();
+        if (!res.ok) throw new Error(logged.error ?? "Could not log that.");
         setStreak(logged.streak ?? null);
+        setGained(logged.xp ?? null);
       }
       setPhase("done");
     } catch (err) {

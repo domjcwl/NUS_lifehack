@@ -10,7 +10,7 @@ const TABS = [
   { href: "/bins", label: "Bins", icon: PinIcon },
   { href: "/chat", label: "Ask", icon: ChatIcon },
   { href: "/news", label: "Learn", icon: BookIcon },
-  { href: "/friends", label: "Pet/Friends", icon: HeartIcon },
+  { href: "/group", label: "Group", icon: HeartIcon },
   { href: "/impact", label: "Impact", icon: ChartIcon },
 ];
 

@@ -131,7 +131,7 @@ nearby would have been designing against our own evidence. The blue bin at the f
 HDB block is the densest point-of-decision surface in Singapore, so that is where Floe
 lives. E-waste points *do* cover campus, which is a natural second phase.
 
-## Accounts and friends
+## Accounts, groups and growth
 
 Sign-in and account creation live on one page at **`/login`**, which takes an
 optional `?next=` (in-app paths only) and a `?mode=signin`. It is never the
@@ -146,14 +146,37 @@ guest-first rather than login-first.
 
 - **Unique usernames**, 3–20 chars, `[a-z0-9_]`, checked live as you type and
   enforced by a `UNIQUE` constraint rather than by the check alone.
-- **Find people in-app** by username or display name at `/friends`.
-- Adding a friend is **mutual immediately** — no pending-request flow. A
-  hackathon simplification, deliberate and noted here.
-- A friend row carries their **live bear state** (streak, mood, floe health).
-  You can see whether their ice is holding; you cannot see their bins, their
-  location, or what they threw away.
-- Guests can use everything except friends, and are prompted to claim a
-  username at the point they try.
+- **Groups** are a block, a flat or a family. Create one and share a six-character
+  invite code; the alphabet excludes `0/O` and `1/I/L` because the code gets read
+  aloud and typed by someone else.
+- Every member keeps **their own bear** — the group is where you see whose ice is
+  holding, not a shared pet. Loss aversion stays personal.
+- A member row carries their **live bear state** (streak, mood, floe health,
+  level). You cannot see their bins, their location, or what they threw away.
+- Guests can use everything except groups, and are prompted to claim a username
+  at the point they try.
+
+### Points and growth
+
+Points are not the reward — **the bear is**. Every point goes into the animal
+getting visibly bigger, from a cub at level 1 to a great bear at level 11, so
+progress is something you see rather than a number in a corner. This is the
+answer to the brief's warning about "a badge stuck on a dashboard": there is no
+badge, and the dashboard number exists only to explain the growth.
+
+| Award | Points |
+|---|---|
+| A verified action at a bin | 10 |
+| The item went into the right stream | +5 |
+| Every seventh consecutive day | +25 |
+
+XP is the **sum of a ledger**, never a stored counter, so every point can be
+explained and nothing drifts.
+
+**The same photo cannot be logged twice.** Each verified image is content-hashed
+and the hash is unique per user. It is a content hash, not a perceptual one — a
+re-crop defeats it. Enough to stop the lazy path of re-submitting one saved
+image, not a serious anti-fraud measure.
 
 ### Storage
 

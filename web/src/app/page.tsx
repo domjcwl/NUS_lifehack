@@ -8,6 +8,10 @@ import type { Action, BearMood } from "@/lib/types";
 
 interface State {
   streak: number;
+  level: number;
+  xp: number;
+  levelProgress: number;
+  stage: string;
   mood: BearMood;
   health: number;
   total: number;
@@ -59,7 +63,7 @@ export default function Home() {
     <>
       <div className="stagger space-y-4">
         <section className="card card-lg overflow-hidden">
-          <Bear mood={s.mood} health={s.health} fromHealth={fromHealth} />
+          <Bear mood={s.mood} health={s.health} fromHealth={fromHealth} level={s.level} />
 
           <div className="px-5 pb-5 pt-4">
             {/* The display face earns its keep at this size, not at 14px. */}
@@ -67,6 +71,30 @@ export default function Home() {
             <p className="mt-2.5 max-w-[26ch] text-[0.98rem] text-[var(--frost-dim)]">
               {copy.line}
             </p>
+
+            {/* Points buy growth, so the bar sits under the animal it grows. */}
+            <div className="mt-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-[0.95rem]">
+                  <span className="capitalize">{s.stage}</span>
+                  <span className="text-[var(--frost-faint)]"> · level {s.level}</span>
+                </p>
+                <p className="tnum text-[0.8rem] text-[var(--frost-faint)]">{s.xp} XP</p>
+              </div>
+              <div
+                className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--night-3)]"
+                role="progressbar"
+                aria-valuenow={Math.round(s.levelProgress * 100)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Progress to level ${s.level + 1}`}
+              >
+                <div
+                  className="h-full rounded-full bg-[var(--aurora-1)] transition-[width] duration-500"
+                  style={{ width: `${Math.max(3, s.levelProgress * 100)}%` }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 border-t border-[var(--edge)]">

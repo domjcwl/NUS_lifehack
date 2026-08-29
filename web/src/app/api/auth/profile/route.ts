@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { bearHealth, bearMood, streakFrom } from "@/lib/bear";
-import { actionsFor, friendsOf, updateProfile } from "@/lib/repo";
+import { actionsFor, groupsFor, updateProfile, xpFor } from "@/lib/repo";
+import { levelFor, stageFor } from "@/lib/level";
 import { currentUser } from "@/lib/session";
 import { computeStats } from "@/lib/stats";
 
@@ -13,7 +14,10 @@ export async function GET() {
 
   return NextResponse.json({
     user,
-    friendCount: friendsOf(user.id).length,
+    groupCount: groupsFor(user.id).length,
+    xp: xpFor(user.id),
+    level: levelFor(xpFor(user.id)),
+    stage: stageFor(levelFor(xpFor(user.id))),
     mood: bearMood(last),
     health: bearHealth(last),
     stats: {
