@@ -92,11 +92,21 @@ feedback. **Use them** — they are the people whose companies wrote the briefs.
 
 ## TO FILL IN AT 11:00
 
-### Actual challenge statements
-> Paste all five here verbatim.
+### Actual challenge statement
+**"Small Green Habits: Nudging Real, Measurable Sustainable Behaviour"** — contributed by
+**Ecovolt Technologies**, contact Glenn (glenn@ecovolt.ai).
+**Full text: `docs/problem-statement.md`. Read that, not this summary.**
 
-### Actual judging criteria and weightings
-> Paste here. This drives every scoping decision — get it exact.
+### Actual judging criteria
+1. **Behaviour-change potential** — credible path to a person genuinely changing what they do;
+   mechanic grounded in how people act, "not just a badge stuck on a dashboard"
+2. **Measurability** — a specific behaviour with a **baseline, a metric and a target**; could you
+   tell *with evidence* whether it worked
+3. **Stickiness & retention** — does it hold on **day 30**, not just day 1
+4. **Craft & usability** — genuinely usable end to end, low friction
+
+Weightings TBC by the committee. Note the explicit warning: *"a technically heavy backend will
+not earn extra points if it does not move behaviour."*
 
 ### Submission fields required on Devpost
 > Check the form early on Sunday, not at 10:55.
