@@ -19,6 +19,19 @@ interface State {
   recent: Action[];
 }
 
+const fallbackState: State = {
+  streak: 0,
+  level: 1,
+  xp: 0,
+  levelProgress: 0,
+  stage: "seedling",
+  mood: "happy",
+  health: 100,
+  total: 0,
+  lastActionAt: null,
+  recent: [],
+};
+
 export default function Home() {
   const [s, setS] = useState<State | null>(null);
   const [fromHealth, setFromHealth] = useState<number | undefined>(undefined);
@@ -29,7 +42,14 @@ export default function Home() {
       setFromHealth(Number(stashed));
       sessionStorage.removeItem("floe:fromHealth");
     }
-    fetch("/api/log").then((r) => r.json()).then(setS);
+
+    fetch("/api/log")
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Log request failed: ${r.status}`);
+        return r.json();
+      })
+      .then((data) => setS(data))
+      .catch(() => setS(fallbackState));
   }, []);
 
   if (!s) {

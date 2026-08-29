@@ -408,6 +408,17 @@ export function joinGroup(userId: string, groupId: string): void {
     .run(groupId, userId, Date.now());
 }
 
+export function renameGroup(userId: string, groupId: string, name: string): Group | null {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  const updated = db()
+    .prepare(
+      "UPDATE groups SET name = ? WHERE id = ? AND id IN (SELECT group_id FROM group_members WHERE user_id = ?)",
+    )
+    .run(trimmed.slice(0, 60), groupId, userId);
+  return updated.changes > 0 ? getGroup(groupId) : null;
+}
+
 export function leaveGroup(userId: string, groupId: string): void {
   db().prepare("DELETE FROM group_members WHERE group_id = ? AND user_id = ?").run(groupId, userId);
 }
