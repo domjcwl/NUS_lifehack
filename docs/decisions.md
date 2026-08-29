@@ -474,3 +474,25 @@ swappable data layer. Turso/libSQL is the closest fit. The cost is that every ho
 while `node:sqlite` is sync: 30 exported functions and ~70 call sites across 7 files gain
 `await`. Roughly 60–90 minutes, with the risk landing on login and points. Deferred, not
 rejected — the judged demo runs off the tunnel against a real database.
+
+## The demo runs in two places (Sun 30 Aug, ~01:00)
+
+Vercel serves the public app; the laptop serves anything with an account behind it.
+
+Reproduced on the deployment: two consecutive requests returned two different users — claim
+succeeded as one id, `/api/auth/me` came back a fresh guest, and creating a group then 403'd
+with "claim a username first". The group page was right to show the claim screen; the account
+had genuinely ceased to exist. The identical flow is clean on localhost.
+
+The cause is `/tmp` being per-instance on Vercel, which is what `db.ts` falls back to because
+the rest of the filesystem is read-only. Signup appears to succeed and then silently
+un-happens, which is worse than not offering it.
+
+So: printed stickers point at Vercel, because a judge scanning with their own phone needs no
+laptop and that is the strongest moment in the demo. The streak, the bear's growth and the
+leaderboard are shown on the laptop against the real database. Chat is grounded there too,
+since the knowledge service runs locally.
+
+Chosen over swapping to a hosted database (Turso, ~60-90 min across 30 functions and 70 call
+sites) because it was 01:00 and the risk landed on login and points — the two things that must
+not break in front of a judge. The swap remains the right permanent fix.

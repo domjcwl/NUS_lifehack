@@ -83,6 +83,30 @@ Judging criterion 2 asks for a baseline, a metric, and a target. Ours, visible i
 The Impact screen's cohort figures are **simulated and labelled as such throughout**. The
 brief permits mocked inputs; it does not permit presenting them as real.
 
+## Where it runs
+
+Two places, on purpose.
+
+| | Vercel — https://web-eta-ten-33.vercel.app | The laptop |
+|---|---|---|
+| Map, 12,902 NEA bins | ✅ | ✅ |
+| QR stickers and `/scan/<code>` | ✅ | ✅ |
+| Photo verification (OpenAI) | ✅ | ✅ |
+| Ask (chat) | ✅ ungrounded | ✅ grounded, cites NEA sources |
+| Accounts, streak, points, leaderboard | ❌ | ✅ |
+
+The split is not laziness, it is where the data lives. The store is SQLite in a file, and
+Vercel's filesystem is read-only outside `/tmp`, which is per-instance: an account created on
+one request is gone on the next, so signup appears to succeed and then silently un-happens.
+Rather than pretend otherwise, accounts are demonstrated on the machine holding the real
+database.
+
+**Printed QR stickers point at Vercel**, so anyone can scan one on their own phone with no
+laptop involved. The streak and leaderboard are shown on the laptop.
+
+The permanent fix is a hosted database behind `repo.ts` — that module is the single data layer
+and was built to be swapped. See `docs/decisions.md` for the sizing.
+
 ## Running it
 
 Requires Node 20+ and Python 3.12+.
