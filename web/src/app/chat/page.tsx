@@ -36,35 +36,34 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col gap-4 rise pb-20">
+    <div className="flex flex-col gap-4 rise pb-28">
       <header>
-        <h1 className="text-[1.6rem]">Which bin?</h1>
-        <p className="mt-2 text-sm text-[var(--frost-dim)]">
+        <h1 className="text-[2.2rem] leading-none">Which bin?</h1>
+        <p className="mt-3 text-[1.05rem] leading-relaxed text-[var(--frost-dim)]">
           Hesitation is where recyclables end up in general waste. Ask and go.
         </p>
       </header>
 
-      <div className="flex-1 space-y-3">
+      <div className="mt-2 flex-1 space-y-4">
         {msgs.length === 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-3">
             {SUGGESTIONS.map((s) => (
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="press hoverable min-h-11 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-[0.85rem]"
+                className="press hoverable flex min-h-14 w-full items-center rounded-[1.7rem] border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-left text-[0.95rem] text-[var(--frost)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
               >
                 {s}
               </button>
             ))}
           </div>
         )}
+
         {msgs.map((m, i) => (
           <div
             key={i}
             className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
-              m.role === "user"
-                ? "ml-auto btn-primary "
-                : "card"
+              m.role === "user" ? "ml-auto btn-primary" : "card"
             }`}
           >
             {m.content}
@@ -78,20 +77,19 @@ export default function Chat() {
           e.preventDefault();
           send(input);
         }}
-        className="fixed inset-x-0 z-20 mx-auto flex max-w-lg gap-2 px-4"
-        style={{ bottom: "calc(var(--tabbar-h) + var(--safe-b) + 0.75rem)" }}
+        className="mt-2 flex items-center gap-3"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about an item…"
           /* 16px minimum stops iOS zooming the viewport on focus. */
-          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/70 px-5 text-base outline-none backdrop-blur transition-colors focus:border-[var(--aurora-2)]"
+          className="min-h-14 flex-1 rounded-full border border-[var(--edge)] bg-[var(--night-3)]/70 px-5 text-base text-[var(--frost)] outline-none transition-colors placeholder:text-[var(--frost-dim)] focus:border-[var(--aurora-2)]"
         />
         <button
           type="submit"
           disabled={busy}
-          className="press min-h-14 shrink-0 rounded-full btn-primary px-6 text-[0.95rem] font-medium   disabled:opacity-40"
+          className="press grid min-h-14 w-28 place-items-center rounded-full bg-[var(--ice)] text-[1.05rem] font-medium text-[var(--night-0)] disabled:opacity-40"
         >
           Ask
         </button>

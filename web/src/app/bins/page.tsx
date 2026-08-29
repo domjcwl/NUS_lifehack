@@ -12,7 +12,7 @@ const BinMap = dynamic(() => import("@/components/BinMap"), {
 
 type NearBin = Bin & { metres: number };
 
-const ALL_KINDS: BinKind[] = ["recycling", "ewaste", "lighting"];
+const ALL_KINDS: BinKind[] = ["recycling", "ewaste"];
 
 export default function Bins() {
   const [kinds, setKinds] = useState<BinKind[]>(ALL_KINDS);
@@ -128,7 +128,7 @@ export default function Bins() {
 }
 
 function kindLabel(k: Bin["kind"]) {
-  return k === "recycling" ? "Recycling" : k === "ewaste" ? "E-waste" : "Lamps";
+  return k === "recycling" ? "Recycling" : "E-waste";
 }
 
 function format(m: number) {

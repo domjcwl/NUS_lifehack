@@ -47,20 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
 
-        {/*
-          Scroll edge effect — a soft fade where content meets the floating
-          chrome, rather than a hard divider or an abrupt collision.
-        */}
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-x-0 z-20"
-          style={{
-            bottom: "calc(var(--tabbar-h) + var(--safe-b))",
-            height: "5rem",
-            background:
-              "linear-gradient(to top, var(--night-0) 10%, rgba(3, 10, 16, 0.7) 55%, transparent 100%)",
-          }}
-        />
         <TabBar />
       </body>
     </html>

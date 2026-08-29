@@ -28,13 +28,11 @@ function clusterIcon(count: number): L.DivIcon {
 const KIND_COLOUR: Record<BinKind, string> = {
   recycling: "#3ad9a6",
   ewaste: "#ff7d55",
-  lighting: "#f2bc4c",
 };
 
 const FILTERS: { kind: BinKind; label: string }[] = [
   { kind: "recycling", label: "Recycling" },
   { kind: "ewaste", label: "E-waste" },
-  { kind: "lighting", label: "Lamps" },
 ];
 
 export default function BinMap({

@@ -127,7 +127,7 @@ export default function Bear({
   return (
     <svg
       viewBox="0 0 300 210"
-      className="block w-full max-w-sm"
+      className="mx-auto block w-full max-w-[18rem]"
       role="img"
       aria-label={`Nanuq is ${mood}. The ice floe is at ${health} percent.`}
     >
