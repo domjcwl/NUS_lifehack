@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "git pull --rebase && npm run build && vercel --prod"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.22",
