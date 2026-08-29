@@ -173,3 +173,16 @@ h2 { letter-spacing: -0.016em; line-height: 1.2; }
   .card, .card-lg { background: #ffffff; backdrop-filter: none; border-color: var(--edge); }
   .chrome-dark { background: var(--abyss); backdrop-filter: none; }
 }
+
+/* Cluster counts sit on the marker itself — no tooltip chrome. */
+.leaflet-tooltip.cluster-label {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0;
+}
+.leaflet-tooltip.cluster-label::before { display: none; }
+.leaflet-container { font-family: inherit; }

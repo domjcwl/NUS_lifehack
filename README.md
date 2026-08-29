@@ -94,7 +94,15 @@ a photo was checked when it wasn't.
 2. Press **Scan the code at COM3 Level 1**. This stands in for a phone camera reading a
    printed QR; it mints a real one-time scan instance.
 3. Take or upload a photo. It is validated, then logged, and the streak advances.
-4. Open `/impact` for the measurement story.
+4. Open `/bins` for the island-wide map — 13,006 real NEA points, clustered.
+5. Open `/impact` for the measurement story.
+
+### A note on coverage
+
+NEA's recycling-bin dataset covers **HDB estates**. Around NUS the nearest blue bin in the
+national data is ~1.1 km away (Clementi); in Tampines it is ~125 m. E-waste points *do*
+cover campus. This is a real gap, and it is part of why Floe mints its own scan points:
+the national dataset stops where campus begins.
 
 ## Project layout
 
@@ -130,8 +138,14 @@ dropped database connection. It is a single module to swap.
   decisions. Guidance only; none of that repo's code ships here.
 - **Anthropic Claude API** (`@anthropic-ai/sdk`, `claude-opus-5`) — photo verification and
   the recycling assistant.
-- Campus bin locations are **representative sample data**, not an official NEA or NUS
-  dataset.
+- **Bin locations are real open government data**, not samples: NEA's *Recycling Bins*
+  (12,291 points), *E-waste Recycling* (713) and *Lighting Waste Collection Points* (2)
+  datasets, retrieved from [data.gov.sg](https://data.gov.sg) on 29 Aug 2026 under the
+  Singapore Open Data Licence. `scripts/fetch-bins.py` and `scripts/build-bins.py`
+  reproduce `web/data/bins.json` from source.
+- **Basemap tiles from [OneMap](https://www.onemap.gov.sg/)** © Singapore Land Authority —
+  the official national basemap, no API key required.
+- **Leaflet** / **react-leaflet** for the map, **supercluster** for server-side clustering.
 - Impact-screen cohort figures are **simulated**, as described above.
 - Singapore recycling guidance in the assistant's prompt reflects publicly documented NEA
   blue-bin rules.
