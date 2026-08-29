@@ -496,3 +496,13 @@ since the knowledge service runs locally.
 Chosen over swapping to a hosted database (Turso, ~60-90 min across 30 functions and 70 call
 sites) because it was 01:00 and the risk landed on login and points — the two things that must
 not break in front of a judge. The swap remains the right permanent fix.
+
+## backend/ deleted (Sun 30 Aug, ~01:15)
+
+The entries above referring to `backend/` are kept as written — they were true when logged. For
+anyone reading them later: that directory no longer exists. The chatbot it once held now lives
+in `fastAPI_chatbot/`, and `backend/` had been emptied of every file well before this, leaving
+17 directories and nothing in them. Git never tracked it, since git does not track empty
+directories, so it was only ever local clutter — but a judge browsing the tree would have found
+an abandoned skeleton beside the live service and drawn the obvious conclusion. Its last real
+contents are recoverable from commit `1981459`.

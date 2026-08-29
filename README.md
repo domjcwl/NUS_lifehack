@@ -136,7 +136,8 @@ the service only owns chat. Set `CHATBOT_URL` if you move it off port 8000.
 ### API key
 
 Photo validation and the assistant call OpenAI. **One key serves the whole
-project** — the Next.js app and the Python backend both read `OPENAI_API_KEY`
+project** — the Next.js app and the chatbot service in `fastAPI_chatbot/` both read
+`OPENAI_API_KEY`
 and both default to `gpt-4o-mini`.
 
 ```bash
@@ -332,7 +333,7 @@ dropped database connection. It is a single module to swap.
   decisions. Guidance only; none of that repo's code ships here.
 - **OpenAI API** (`openai`, `gpt-4o-mini`) — photo verification and the recycling
   assistant. Chosen over a second provider so one key covers both the Next.js app
-  and the Python backend.
+  and the chatbot service in `fastAPI_chatbot/`.
 - **FastAPI**, **Uvicorn**, **pydantic-settings** and **LangGraph** — the chat knowledge
   service in `fastAPI_chatbot/`. LangGraph runs the answer as an explicit state machine
   (classify → retrieve → locate → generate → ground-check) rather than one model call.

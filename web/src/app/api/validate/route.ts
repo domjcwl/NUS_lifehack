@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 /**
- * Photo verification. Uses OpenAI to match the Python backend, so one
+ * Photo verification. Uses OpenAI to match the chatbot service, so one
  * OPENAI_API_KEY serves the whole project and the team is not maintaining two
- * model providers. Model names mirror backend/app/config.py deliberately.
+ * model providers. Model names mirror fastAPI_chatbot/app/config.py deliberately.
  */
 
 const HAS_KEY = Boolean(process.env.OPENAI_API_KEY);
