@@ -12,7 +12,7 @@ const BinMap = dynamic(() => import("@/components/BinMap"), {
 
 type NearBin = Bin & { metres: number };
 
-const ALL_KINDS: BinKind[] = ["recycling", "ewaste", "lighting"];
+const ALL_KINDS: BinKind[] = ["recycling", "ewaste"];
 
 export default function Bins() {
   const [kinds, setKinds] = useState<BinKind[]>(ALL_KINDS);
@@ -51,7 +51,7 @@ export default function Bins() {
       <header>
         <h1 className="text-[1.6rem]">Every bin in Singapore</h1>
         <p className="mt-1.5 text-[0.95rem] text-[var(--frost-dim)]">
-          13,006 recycling and e-waste points, straight from NEA — including the blue bin at
+          13,004 recycling and e-waste points, straight from NEA — including the blue bin at
           the foot of your block. The most common reason something recyclable goes in general
           waste is simply not knowing where the right bin is.
         </p>
@@ -128,7 +128,7 @@ export default function Bins() {
 }
 
 function kindLabel(k: Bin["kind"]) {
-  return k === "recycling" ? "Recycling" : k === "ewaste" ? "E-waste" : "Lamps";
+  return k === "recycling" ? "Recycling" : "E-waste";
 }
 
 function format(m: number) {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { nearest, pointsInView, type BinKind } from "@/lib/bins";
 
-const ALL: BinKind[] = ["recycling", "ewaste", "lighting"];
+const ALL: BinKind[] = ["recycling", "ewaste"];
 
 function kindsFrom(param: string | null): BinKind[] {
   if (!param) return ALL;

@@ -232,8 +232,8 @@ dropped database connection. It is a single module to swap.
   assistant. Chosen over a second provider so one key covers both the Next.js app
   and the Python backend.
 - **Bin locations are real open government data**, not samples: NEA's *Recycling Bins*
-  (12,291 points), *E-waste Recycling* (713) and *Lighting Waste Collection Points* (2)
-  datasets, retrieved from [data.gov.sg](https://data.gov.sg) on 29 Aug 2026 under the
+  (12,291 points) and *E-waste Recycling* (713) datasets, retrieved from
+  [data.gov.sg](https://data.gov.sg) on 29 Aug 2026 under the
   Singapore Open Data Licence. `scripts/fetch-bins.py` and `scripts/build-bins.py`
   reproduce `web/data/bins.json` from source.
 - **Basemap tiles from [OneMap](https://www.onemap.gov.sg/)** © Singapore Land Authority —

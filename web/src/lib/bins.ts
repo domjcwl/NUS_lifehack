@@ -1,7 +1,7 @@
 import Supercluster from "supercluster";
 import raw from "../../data/bins.json";
 
-export type BinKind = "recycling" | "ewaste" | "lighting";
+export type BinKind = "recycling" | "ewaste";
 
 interface RawBin {
   n: string;
