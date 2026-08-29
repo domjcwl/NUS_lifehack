@@ -1,0 +1,26 @@
+# Deploying the knowledge service.
+#
+# Without this running somewhere public, /api/chat on Vercel falls back to a
+# plain model call: the answer is still correct but ungrounded and uncited,
+# which loses the retrieval that makes it worth having.
+#
+# Render is used because it can deploy from a PUBLIC GIT URL with no GitHub App
+# installation — the repo belongs to another account, and that permission was
+# the wall the Vercel GitHub link hit.
+#
+# Free tier spins down after ~15 minutes idle and takes ~50s to wake. Hit the
+# health endpoint a minute before demoing, or the first question of the day
+# looks like a hang.
+services:
+  - type: web
+    name: floe-chatbot
+    runtime: python
+    plan: free
+    rootDir: fastAPI_chatbot
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      # Set in the Render dashboard, never committed.
+      - key: OPENAI_API_KEY
+        sync: false
