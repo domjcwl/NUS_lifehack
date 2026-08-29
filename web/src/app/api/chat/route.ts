@@ -1,8 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import OpenAI from "openai";
 
-const HAS_KEY = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-const client = HAS_KEY ? new Anthropic() : null;
+const HAS_KEY = Boolean(process.env.OPENAI_API_KEY);
+const client = HAS_KEY ? new OpenAI() : null;
+const MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 const SYSTEM = `You answer quick recycling questions for residents standing at a blue bin in Singapore.
 
@@ -10,9 +11,10 @@ Answer the actual question in one or two sentences. Lead with the verdict — wh
 or that it is not recyclable — then the reason if it is not obvious.
 
 Singapore specifics that matter: the blue commingled bins at the foot of most HDB blocks
-take plastic, paper, metal and glass together. Food-contaminated items (greasy pizza boxes, used tissues, unwashed containers)
-go in general waste and contaminate a whole bag if they don't. Soft plastics and styrofoam
-are not accepted in most blue bins. Rinse containers first.
+take plastic, paper, metal and glass together. Food-contaminated items (greasy pizza boxes,
+used tissues, unwashed containers) go in general waste and contaminate a whole bag if they
+don't. Soft plastics and styrofoam are not accepted in most blue bins. Rinse containers
+first.
 
 Never lecture, never moralise, never add an environmental appeal. The person is standing at
 a bin holding something and wants to know where it goes. If you genuinely do not know,
@@ -34,19 +36,20 @@ export async function POST(req: Request) {
   }
 
   try {
-    const res = await client.messages.create({
-      model: "claude-opus-5",
-      max_tokens: 512,
-      system: SYSTEM,
-      output_config: { effort: "low" },
-      messages,
+    const completion = await client.chat.completions.create({
+      model: MODEL,
+      messages: [{ role: "system", content: SYSTEM }, ...messages],
+      /* Short answers by construction — the person is standing at a bin. */
+      max_completion_tokens: 200,
     });
-    if (res.stop_reason === "refusal") {
+
+    const choice = completion.choices[0];
+    if (choice?.finish_reason === "content_filter") {
       return NextResponse.json({ reply: "I can't answer that one.", stubbed: false });
     }
-    const text = res.content.find((b) => b.type === "text");
+
     return NextResponse.json({
-      reply: text?.type === "text" ? text.text : "No answer came back.",
+      reply: choice?.message?.content ?? "No answer came back.",
       stubbed: false,
     });
   } catch (err) {

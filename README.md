@@ -95,13 +95,18 @@ npm run dev          # http://localhost:3000
 
 ### API key
 
-Photo validation and the assistant call the Anthropic API.
+Photo validation and the assistant call OpenAI. **One key serves the whole
+project** — the Next.js app and the Python backend both read `OPENAI_API_KEY`
+and both default to `gpt-4o-mini`.
 
 ```bash
-cp .env.example .env      # then fill in your key
-# .env
-ANTHROPIC_API_KEY=sk-ant-...
+cd web && cp .env.example .env    # then fill in your key
+# web/.env
+OPENAI_API_KEY=sk-proj-...
 ```
+
+`OPENAI_MODEL` and `OPENAI_VISION_MODEL` are optional overrides; their defaults
+mirror `backend/app/config.py` so the two services stay in step.
 
 **Without a key the app still runs.** The validator returns a stubbed verdict and the UI
 says so explicitly on screen — so the demo survives a dead network, without ever pretending
@@ -223,8 +228,9 @@ dropped database connection. It is a single module to swap.
 - **Design guidance** from [emilkowalski/skills](https://github.com/emilkowalski/skills) (MIT) —
   `emil-design-eng` and `apple-design` informed the motion, easing and mobile interaction
   decisions. Guidance only; none of that repo's code ships here.
-- **Anthropic Claude API** (`@anthropic-ai/sdk`, `claude-opus-5`) — photo verification and
-  the recycling assistant.
+- **OpenAI API** (`openai`, `gpt-4o-mini`) — photo verification and the recycling
+  assistant. Chosen over a second provider so one key covers both the Next.js app
+  and the Python backend.
 - **Bin locations are real open government data**, not samples: NEA's *Recycling Bins*
   (12,291 points), *E-waste Recycling* (713) and *Lighting Waste Collection Points* (2)
   datasets, retrieved from [data.gov.sg](https://data.gov.sg) on 29 Aug 2026 under the
