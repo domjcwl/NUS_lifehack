@@ -1,0 +1,55 @@
+# --- Secrets (repo is PUBLIC - never commit these) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+credentials.json
+serviceAccount*.json
+
+# --- Node ---
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+.vercel/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- Data / models (keep the repo small enough to clone at the judging table) ---
+*.sqlite
+*.sqlite3
+*.db
+*.pt
+*.onnx
+*.pkl
+data/raw/
+data/large/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# --- Local Claude state (keep .claude/skills tracked, ignore the rest) ---
+.claude/settings.local.json
