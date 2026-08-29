@@ -119,7 +119,7 @@ a photo was checked when it wasn't.
    printed on the bin; it mints a real one-time scan instance. Blk 826A Tampines Street 81
    is a real blue-bin location from the NEA dataset.
 3. Take or upload a photo. It is validated, then logged, and the streak advances.
-4. Open `/bins` for the island-wide map — 13,006 real NEA points, clustered.
+4. Open `/bins` for the island-wide map — 13,004 real NEA points, clustered.
 5. Open `/impact` for the measurement story.
 
 ### Why HDB residents, and not students
