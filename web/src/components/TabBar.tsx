@@ -49,7 +49,7 @@ export default function TabBar() {
                   {t.label}
                 </span>
                 {active && (
-                  <span className="absolute inset-x-5 top-0 h-px bg-[var(--glacier)]" />
+                  <span className="absolute inset-x-5 top-0 h-px bg-[var(--ice)]" />
                 )}
               </Link>
             </li>
