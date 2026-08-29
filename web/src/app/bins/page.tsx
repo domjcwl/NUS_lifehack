@@ -9,7 +9,7 @@ import type { Bin, BinKind } from "@/lib/bins";
 /* Leaflet touches window on import, so it can never render on the server. */
 const BinMap = dynamic(() => import("@/components/BinMap"), {
   ssr: false,
-  loading: () => <div className="card h-[58vh] min-h-[340px] animate-pulse opacity-60" />,
+  loading: () => <div className="card h-[58vh] min-h-[340px] animate-pulse opacity-50" />,
 });
 
 type NearBin = Bin & { metres: number };

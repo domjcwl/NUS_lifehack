@@ -9,6 +9,7 @@ import {
   joinGroup,
   leaveGroup,
   membersOf,
+  renameGroup,
   xpFor,
 } from "@/lib/repo";
 import { currentUser } from "@/lib/session";
@@ -40,9 +41,13 @@ export async function GET() {
   return NextResponse.json({ groups });
 }
 
-/** POST — create a group, or join one with an invite code. */
+/** POST — create a group, join one with an invite code, or rename an existing group. */
 export async function POST(req: Request) {
-  const { name, code } = (await req.json()) as { name?: string; code?: string };
+  const { name, code, groupId } = (await req.json()) as {
+    name?: string;
+    code?: string;
+    groupId?: string;
+  };
   const me = await currentUser();
 
   if (me.isGuest) {
@@ -59,6 +64,18 @@ export async function POST(req: Request) {
     }
     joinGroup(me.id, group.id);
     return NextResponse.json({ group });
+  }
+
+  if (groupId) {
+    const trimmed = name?.trim();
+    if (!trimmed) {
+      return NextResponse.json({ error: "Give the group a name." }, { status: 400 });
+    }
+    const updated = renameGroup(me.id, groupId, trimmed);
+    if (!updated) {
+      return NextResponse.json({ error: "You are not in this group." }, { status: 403 });
+    }
+    return NextResponse.json({ group: updated });
   }
 
   if (!name?.trim()) {

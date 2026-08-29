@@ -34,6 +34,9 @@ export default function GroupPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [renameDrafts, setRenameDrafts] = useState<Record<string, string>>({});
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [confirmLeavingGroupId, setConfirmLeavingGroupId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -64,7 +67,27 @@ export default function GroupPage() {
       if (!res.ok) throw new Error(data.error ?? "That did not work.");
       setName("");
       setCode("");
-      load();
+      setRenameDrafts((prev) => ({ ...prev }));
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "That did not work.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function leaveGroup(groupId: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/groups", {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ groupId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "That did not work.");
+      await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "That did not work.");
     } finally {
@@ -106,12 +129,60 @@ export default function GroupPage() {
 
       {groups.map((g) => (
         <section key={g.id} className="rise">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-head">{g.name}</h2>
-            <span className="text-meta text-[var(--frost-faint)]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <h2 className="text-head truncate">{g.name}</h2>
+              <button
+                type="button"
+                aria-label={`Rename ${g.name}`}
+                onClick={() => {
+                  setRenameDrafts((prev) => ({ ...prev, [g.id]: g.name }));
+                  setEditingGroupId((current) => (current === g.id ? null : g.id));
+                  setConfirmLeavingGroupId(null);
+                }}
+                className="press hoverable inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--edge)] text-body text-[var(--frost)]"
+              >
+                ✎
+              </button>
+            </div>
+            <span className="shrink-0 text-meta text-[var(--frost-faint)]">
               {g.memberCount} {g.memberCount === 1 ? "member" : "members"}
             </span>
           </div>
+
+          {editingGroupId === g.id && (
+            <div className="mt-3 flex gap-2.5">
+              <input
+                value={renameDrafts[g.id] ?? g.name}
+                onChange={(e) =>
+                  setRenameDrafts((prev) => ({ ...prev, [g.id]: e.target.value }))
+                }
+                aria-label={`Rename ${g.name}`}
+                className="min-h-12 flex-1 rounded-2xl border border-[var(--edge)] bg-[var(--night-2)] px-4 text-body outline-none"
+              />
+              <button
+                onClick={() => {
+                  const nextName = (renameDrafts[g.id] ?? g.name).trim();
+                  if (!nextName) return;
+                  setEditingGroupId(null);
+                  void post({ groupId: g.id, name: nextName });
+                }}
+                disabled={busy || !(renameDrafts[g.id] ?? g.name).trim() || (renameDrafts[g.id] ?? g.name).trim() === g.name}
+                className="press hoverable min-h-12 rounded-full border border-[var(--edge)] px-4 text-body disabled:opacity-40"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setEditingGroupId(null);
+                  setRenameDrafts((prev) => ({ ...prev, [g.id]: g.name }));
+                }}
+                className="press hoverable min-h-12 rounded-full border border-[var(--edge)] px-4 text-body"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
 
           <button
             onClick={() => {

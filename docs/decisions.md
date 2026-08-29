@@ -357,6 +357,29 @@ Keeping the animal in the row is how both survive. The number says who is ahead;
 how they are actually doing, including when someone at the top of the board has a floe that is
 melting.
 
+## UI sharpening pass (Sat 29 Aug, ~22:00)
+
+**Keyboard focus was invisible.** No `:focus-visible` styling existed anywhere, and on a dark
+ground the browser default ring is close to unreadable — anyone navigating by keyboard or switch
+had no idea where they were. Now a 2px `--ice` outline with 2px offset, scoped with `:where()` so
+it costs no specificity, plus a rule for Leaflet's own controls, which sit outside the app's DOM.
+An outline rather than a shadow, because this app has no shadows. `:focus-visible` rather than
+`:focus`, so a mouse press does not leave a ring behind.
+
+**The scan verdict was announced to nobody.** It is the answer to the only question that screen
+asks, and it appeared silently. It is now an `aria-live="polite"` region — polite rather than
+assertive, so it follows what the user is doing instead of interrupting. Its error also gained
+`role="alert"`, which login and group already had; the most important error surface in the app
+was the one without it.
+
+**Radii collapsed to two.** `rounded-lg` on two inline notes and one hand-picked `rounded-[1.7rem]`
+card sat among a UI of `rounded-2xl` and `rounded-full`. Now 11 × `2xl` and 34 × `full`, nothing
+else. Loading skeletons likewise ran at three different opacities for one job; all are 50% now.
+
+Checked and found already sound: no `transition: all`, every tap target at or above the 44px
+floor, decorative SVGs hidden from assistive tech, images captioned, errors and the chart already
+carrying live regions.
+
 ## The chat tab is a client of the Python service, not a second chatbot (Sat 29 Aug, ~22:00)
 
 `web/src/app/api/chat/route.ts` was a system prompt and one `chat.completions.create`. The

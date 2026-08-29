@@ -133,7 +133,7 @@ export default function Chat() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="press hoverable flex min-h-14 w-full items-center rounded-[1.7rem] border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-left text-body text-[var(--frost)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+                className="press hoverable flex min-h-14 w-full items-center rounded-2xl border border-[var(--edge)] bg-[var(--night-3)]/50 px-4 text-left text-body text-[var(--frost)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
               >
                 {s}
               </button>

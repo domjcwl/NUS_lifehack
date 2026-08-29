@@ -137,8 +137,11 @@ export default function ScanClient({ bin }: { bin: Bin }) {
             </div>
           )}
 
+          {/* The verdict is the answer to the one question this screen asks, so
+              it is announced rather than only drawn. Polite, not assertive: it
+              should follow what the user is doing, not interrupt it. */}
           {(phase === "checking" || phase === "done") && (
-            <div className="pad">
+            <div className="pad" aria-live="polite">
               {phase === "checking" && (
                 <div className="flex items-center gap-2.5">
                   <span className="size-2 animate-pulse rounded-full bg-[var(--aurora-2)]" />
@@ -178,14 +181,14 @@ export default function ScanClient({ bin }: { bin: Bin }) {
                   )}
 
                   {verdict.stubbed && (
-                    <p className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-micro text-[var(--frost-dim)]">
+                    <p className="rounded-2xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-micro text-[var(--frost-dim)]">
                       Demo mode: no API key on this machine, so the photo was not actually
                       checked. Set OPENAI_API_KEY to run real validation.
                     </p>
                   )}
 
                   {verdict.verified && !verdict.correctlySorted && (
-                    <p className="rounded-lg bg-[var(--night-3)] px-3 py-2 text-micro text-[var(--frost-dim)]">
+                    <p className="rounded-2xl bg-[var(--night-3)] px-3 py-2 text-micro text-[var(--frost-dim)]">
                       Looks like the wrong stream — it belongs in {verdict.stream}.
                     </p>
                   )}
@@ -195,7 +198,11 @@ export default function ScanClient({ bin }: { bin: Bin }) {
           )}
         </div>
 
-        {error && <p className="text-micro text-[var(--coral)]">{error}</p>}
+        {error && (
+          <p role="alert" className="text-micro text-[var(--coral)]">
+            {error}
+          </p>
+        )}
       </div>
 
       <div
